@@ -1,18 +1,19 @@
 #!/bin/bash
-EXE=/home/xin/workspace/codes/install/bin/model-net-mpi-replay
+EXE=/home/xinwang/tools/codes/install/bin/model-net-mpi-replay
 NET_CONFIG='-- runtime_conf/8r_dragonfly.conf'
 FLAG='--sync=1 --disable_compute=1 --workload_type=dumpi'
 APP=( amg mg cr )
-APP_PATH=( "/home/fillall/Downloads/df_AMG_n216_dumpi/dumpi-2014.03.03.14.55.23-" \
-          "/home/fillall/Downloads/MultiGrid_C_n125_dumpi/dumpi-2014.03.06.23.48.13-" \
-          "/home/fillall/Downloads/CrystalRouter/100/dumpi--2014.04.23.12.12.05-" )
+APP_PATH=( "/home/xinwang/traces/AMG/n216_dumpi/dumpi-2014.03.03.14.55.23-" \
+          "/home/xinwang/traces/MG/n125_dumpi/dumpi-2014.03.06.23.48.13-" \
+          "/home/xinwang/traces/CR/n100_dumpi/dumpi--2014.04.23.12.12.05-" )
 RANK=( 216 125 100 )
-SEED=10
-MAX=5
-payload=( 1861 )
-interval=( 10000 )
+SEED=5
+MAX=20
+INTERVAL_MAX=1
+payload=( 950 950 950 )
+interval=( 10000 20000 500000)
 bcknodes=( 0 1056 )
-allocation=( "rand_node" "cont-perm" "rand_rotr" "rand_grop")
+allocation=( "cont-cons" "rand_node" "rand_rotr" "cont-perm")
 
 declare -a nametag
 declare -A matrix_payload
@@ -25,19 +26,16 @@ do
     nametag[i]="${APP[i]}${RANK[i]}"
     for (( j=0; j<$MAX; j++ ))
     do
-        if (( $j != 0 )); then
-            matrix_payload[$i,$j]=$((${payload[0]}*$j*10))
-        else
-            matrix_payload[$i,$j]=${payload[0]}
-        fi
+        matrix_payload[$i,$j]=$((${payload[$i]}*$j+${payload[$i]}))
     done
-    for (( j=0; j<${#interval[@]}; j++ ))
+    for (( j=0; j<$INTERVAL_MAX; j++ ))
     do
-        if [ ${APP[i]} != "cr" ]; then
-            matrix_interval[$i,$j]=${interval[j]}
-        else
-            matrix_interval[$i,$j]=$((${interval[j]}*100))
-        fi
+    #    if [ ${APP[i]} != "cr" ]; then
+    #        matrix_interval[$i,$j]=${interval[j]}
+    #    else
+    #        matrix_interval[$i,$j]=$((${interval[j]}*100))
+    #    fi
+        matrix_interval[$i,$j]=${interval[i]}
     done
     for (( j=0; j<${#bcknodes[@]}; j++ ))
     do
@@ -148,10 +146,10 @@ function execute_test(){
             if (( ${matrix_bcksize[$1,$i]} == 0 )) ; then        
                 WK_FILE=runtime_conf/wk_conf/trace_${nametag[$1]}.conf
                 if [ ${allocation[$q]} == "cont-cons" ]; then
-                    LPIO_CONF="--lp-io-dir=${allocation[$q]}-${nametag[$1]}-bck${matrix_bcksize[$1,$i]}-l${matrix_payload[$1,$k]}-i${matrix_interval[$1,$p]} --lp-io-use-suffix=1"
+                    LPIO_CONF="--lp-io-dir=${allocation[$q]}-${nametag[$1]}-bck0-l0-i0 --lp-io-use-suffix=1"
                     ALLOC_FILE=alloclistgen/${allocation[$q]}-alloc-1056-${RANK[$1]}.conf
                 else
-                    LPIO_CONF="--lp-io-dir=${allocation[$q]}0-${nametag[$1]}-bck${matrix_bcksize[$1,$i]}-l${matrix_payload[$1,$k]}-i${matrix_interval[$1,$p]} --lp-io-use-suffix=1"
+                    LPIO_CONF="--lp-io-dir=${allocation[$q]}0-${nametag[$1]}-bck0-l0-i0 --lp-io-use-suffix=1"
                     ALLOC_FILE=alloclistgen/${allocation[$q]}0-alloc-1056-${RANK[$1]}.conf                    
                 fi
                 echo "run ${allocation[$q]} test with bcksize=0 payload=0 interval=0"
@@ -161,9 +159,13 @@ function execute_test(){
             else
                 for (( k=0; k<$MAX; k++ ))
                 do
-                    for (( p=0; p<${#interval[@]}; p++ ))
+                    for (( p=0; p<$INTERVAL_MAX; p++ ))
                     do
-                        DSEED=1
+			if [ ${allocation[$q]} == "cont-cons" ]; then
+			    DSEED=1
+			else
+                            DSEED=$SEED
+			fi
                         for (( j=0; j<$DSEED; j++ ))
                         do
                             BCK_CONF="--mean_interval=${matrix_interval[$1,$p]} --payload_size=${matrix_payload[$1,$k]}"
@@ -228,7 +230,7 @@ function execute_all_test(){
             else       
                 for (( k=0; k<${#PAYLOADS[@]}; k++ ))
                 do
-                    for (( p=0; p<${#interval[@]}; p++ ))
+                    for (( p=0; p<$INTERVAL_MAX; p++ ))
                     do
                         # if [ ${allocation[$q]} == "cont-cons" ] ; then
                         #     DSEED=1
@@ -264,7 +266,7 @@ function execute_all_test(){
 function assemble_all(){
     for (( q=0; q<${#allocation[@]}; q++ ))
     do
-        for (( p=0; p<${#interval[@]}; p++ ))
+        for (( p=0; p<$INTERVAL_MAX; p++ ))
         do
             # move directories
             fig_dir=${allocation[$q]}-3apps-i${interval[$p]}
@@ -281,7 +283,7 @@ function assemble_all(){
 function draw_all(){
     for (( q=0; q<${#allocation[@]}; q++ ))
     do
-        for (( p=0; p<${#interval[@]}; p++ ))
+        for (( p=0; p<$INTERVAL_MAX; p++ ))
         do
             fig_dir=${allocation[$q]}-3apps-i${interval[$p]}
             cp -r ~/workspace/$fig_dir/* ~/workspace/drawscripts/
@@ -314,26 +316,32 @@ function post_assemble(){
     #assemble same allocation with diff bck load
     for (( q=0; q<${#allocation[@]}; q++ ))
     do
-        for (( p=0; p<${#interval[@]}; p++ ))
+        for (( p=0; p<$INTERVAL_MAX; p++ ))
         do
-            fig_dir={allocation[$q]}-${nametag[$1]}-i${matrix_interval[$1,$p]}-varies-bck
+            fig_dir=${allocation[$q]}-${nametag[$1]}-i${matrix_interval[$1,$p]}-varies-bck
             mkdir ~/workspace/$fig_dir
-            cp -r ~/workspace/{allocation[$q]}*-${nametag[$1]}-bck*-l*-i${matrix_interval[$1,$p]}-*/ ~/workspace/$fig_dir/
+            cp -r ~/workspace/${allocation[$q]}*-${nametag[$1]}-bck*-l*-i*-*/ ~/workspace/$fig_dir/
         done
     done
 
-    #assmeble different allocation
+    #assmeble different allocation with same payload
     for (( i=0; i<${#bcknodes[@]}; i++ ))
     do
-        for (( k=0; k<$MAX; k++ ))
-        do
-            for (( p=0; p<${#interval[@]}; p++ ))
+        if (( ${bcknodes[$i]} == 0 )) ; then
+            fig_dir=varies-alloc-${nametag[$1]}-bck0-l0-i0
+            mkdir ~/workspace/$fig_dir 
+            mv ~/workspace/*-${nametag[$1]}-bck0-l0-i0-*/ ~/workspace/$fig_dir/
+        else
+            for (( k=0; k<$MAX; k++ ))
             do
-                fig_dir=varies-alloc-${nametag[$1]}-bck${matrix_bcksize[$1,$i]}-l${matrix_payload[$1,$k]}-i${matrix_interval[$1,$p]}
-                mkdir ~/workspace/$fig_dir
-                mv ~/workspace/*-${nametag[$1]}-bck${matrix_bcksize[$1,$i]}-l${matrix_payload[$1,$k]}-i${matrix_interval[$1,$p]}-*/ ~/workspace/$fig_dir/
+                for (( p=0; p<$INTERVAL_MAX; p++ ))
+                do
+        	    fig_dir=varies-alloc-${nametag[$1]}-bck${matrix_bcksize[$1,$i]}-l${matrix_payload[$1,$k]}-i${matrix_interval[$1,$p]}
+        	    mkdir ~/workspace/$fig_dir
+                    mv ~/workspace/*-${nametag[$1]}-bck${matrix_bcksize[$1,$i]}-l${matrix_payload[$1,$k]}-i${matrix_interval[$1,$p]}-*/ ~/workspace/$fig_dir/
+	        done
             done
-        done
+	fi
     done
 }
 
@@ -342,9 +350,9 @@ function draw_fig(){
     #draw fig for varies bck load
     for (( q=0; q<${#allocation[@]}; q++ ))
     do
-        for (( p=0; p<${#interval[@]}; p++ ))
+        for (( p=0; p<$INTERVAL_MAX; p++ ))
         do
-            fig_dir={allocation[$q]}-${nametag[$1]}-i${matrix_interval[$1,$p]}-varies-bck
+            fig_dir=${allocation[$q]}-${nametag[$1]}-i${matrix_interval[$1,$p]}-varies-bck
             cp -r ~/workspace/$fig_dir/* ~/workspace/drawscripts/
             echo "draw ${allocation[$q]}-${nametag[$1]}-i${matrix_interval[$1,$p]} figures"
             ./draw.py ${APP[$1]} 1
@@ -365,7 +373,7 @@ function draw_fig(){
     do
         for (( k=0; k<$MAX; k++ ))
         do
-            for (( p=0; p<${#interval[@]}; p++ ))
+            for (( p=0; p<$INTERVAL_MAX; p++ ))
             do
                 fig_dir=varies-alloc-${nametag[$1]}-bck${matrix_bcksize[$1,$i]}-l${matrix_payload[$1,$k]}-i${matrix_interval[$1,$p]}
                 cp -r ~/workspace/$fig_dir/* ~/workspace/drawscripts/
@@ -377,7 +385,7 @@ function draw_fig(){
                 else
                     ./draw.py ${APP[$1]} 1
                     wait
-                    ./draw.py syn 1
+                    .d:/draw.py syn 1
                     wait
                 fi        
                 # mv figures
@@ -391,14 +399,14 @@ function draw_fig(){
     done
 }
 
-# get_ready
-execute_test 0  # amg
-# execute_test 1  # multigrid
-# execute_test 2  # crystal router
+#get_ready
+#execute_test 0  # amg
+#execute_test 1  # multigrid
+execute_test 2  # crystal router
 # post_assemble 0  # amg
-# post_assemble 1  # multigrid
-# post_assemble 2  # crystal router
-# draw_fig 0    # amg
+#post_assemble 1  # multigrid
+#post_assemble 2  # crystal router
+# draw_fig 0  # amg
 # draw_fig 1  # multigrid
 # draw_fig 2  # crystal router
 
