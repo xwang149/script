@@ -1,5 +1,5 @@
 #!/bin/bash
-EXE=/home/xinwang/tools/codes/install/bin/model-net-mpi-replay
+EXE=/home/xinwang/tools/codes-master/install/bin/model-net-mpi-replay
 NET_CONFIG='-- runtime_conf/8r_dragonfly.conf'
 FLAG='--sync=1 --disable_compute=1 --workload_type=dumpi'
 APP=( amg mg cr )
@@ -7,13 +7,13 @@ APP_PATH=( "/home/xinwang/traces/AMG/n216_dumpi/dumpi-2014.03.03.14.55.23-" \
           "/home/xinwang/traces/MG/n125_dumpi/dumpi-2014.03.06.23.48.13-" \
           "/home/xinwang/traces/CR/n100_dumpi/dumpi--2014.04.23.12.12.05-" )
 RANK=( 216 125 100 )
-SEED=5
-MAX=20
+SEED=1
+MAX=1
 INTERVAL_MAX=1
-payload=( 950 950 950 )
-interval=( 10000 20000 500000)
-bcknodes=( 0 1056 )
-allocation=( "cont-cons" "rand_node" "rand_rotr" "cont-perm")
+payload=( 950 30000 30000 )
+interval=( 10000 10000 10000)
+bcknodes=( 1056 )
+allocation=( "rand_node" )
 
 declare -a nametag
 declare -A matrix_payload
@@ -26,7 +26,8 @@ do
     nametag[i]="${APP[i]}${RANK[i]}"
     for (( j=0; j<$MAX; j++ ))
     do
-        matrix_payload[$i,$j]=$((${payload[$i]}*$j+${payload[$i]}))
+        matrix_payload[$i,$j]=$((${payload[$i]}*($j+1)))
+        #matrix_payload[$i,$j]=$((${payload[$i]}+$j*10000))
     done
     for (( j=0; j<$INTERVAL_MAX; j++ ))
     do
@@ -400,9 +401,9 @@ function draw_fig(){
 }
 
 #get_ready
-#execute_test 0  # amg
+execute_test 0  # amg
 #execute_test 1  # multigrid
-execute_test 2  # crystal router
+#execute_test 2  # crystal router
 # post_assemble 0  # amg
 #post_assemble 1  # multigrid
 #post_assemble 2  # crystal router
