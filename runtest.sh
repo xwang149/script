@@ -1,18 +1,18 @@
 #!/bin/bash
-EXE=/home/xinwang/tools/codes-master/install/bin/model-net-mpi-replay
-NET_CONFIG='-- runtime_conf/8r_dragonfly.conf'
-FLAG='--sync=1 --disable_compute=1 --workload_type=dumpi'
+EXE=/home/xwangiit/tools/codes/install/bin/model-net-mpi-replay
+NET_CONFIG='-- /home/xwangiit/workspace/script/runtime_conf/8r_dragonfly.conf'
+FLAG='--sync=1 --disable_compute=1 --enable_sampling=0 --workload_type=dumpi'
 APP=( amg mg cr )
-APP_PATH=( "/home/xinwang/traces/AMG/n216_dumpi/dumpi-2014.03.03.14.55.23-" \
-          "/home/xinwang/traces/MG/n125_dumpi/dumpi-2014.03.06.23.48.13-" \
-          "/home/xinwang/traces/CR/n100_dumpi/dumpi--2014.04.23.12.12.05-" )
-RANK=( 216 125 100 )
+APP_PATH=( "/home/xwangiit/workspace/traces/AMG/n1728_dumpi/dumpi-2014.03.03.14.55.50-" \
+           "/home/xwangiit/workspace/traces/MG/n1000_dumpi/dumpi-2014.03.07.00.25.12-" \
+           "/home/xwangiit/workspace/traces/CR/n100_dumpi/dumpi--2014.04.23.12.12.05-")
+RANK=( 1728 1000 100 )
 SEED=1
 MAX=1
 INTERVAL_MAX=1
 payload=( 950 30000 30000 )
 interval=( 10000 10000 10000)
-bcknodes=( 1056 )
+bcknodes=( 0 3456 )
 allocation=( "rand_node" )
 
 declare -a nametag
@@ -50,7 +50,7 @@ done
 
 function get_ready(){
     # generate workload file  
-    cd ~/workspace/runtime_conf/wk_conf/
+    cd ~/workspace/script/runtime_conf/wk_conf/
     for (( i=0; i<${#APP[@]}; i++ ))
     do
         for (( j=0; j<${#bcknodes[@]}; j++ ))
@@ -72,18 +72,18 @@ function get_ready(){
     done
 
     # generate allocation file    
-    cd ~/workspace/alloclistgen/
-    for (( i=0; i<${#APP[@]}; i++ ))
-    do
-        for (( j=0; j<${#bcknodes[@]}; j++ ))
-        do    
-            if [ ${matrix_bcksize[$i,$j]} == 0 ] ; then
-                ./my_test.py ${RANK[$i]} 0
-            else
-                ./my_test.py ${RANK[$i]} ${matrix_bcksize[$i,$j]} 1
-            fi
-        done
-    done
+#    cd ~/workspace/alloclistgen/
+#    for (( i=0; i<${#APP[@]}; i++ ))
+#    do
+#        for (( j=0; j<${#bcknodes[@]}; j++ ))
+#        do    
+#            if [ ${matrix_bcksize[$i,$j]} == 0 ] ; then
+#                ./my_test.py ${RANK[$i]} 0
+#            else
+#                ./my_test.py ${RANK[$i]} ${matrix_bcksize[$i,$j]} 1
+#            fi
+#        done
+#    done
 }
 
 function prepare_all_test(){
@@ -400,8 +400,8 @@ function draw_fig(){
     done
 }
 
-#get_ready
-execute_test 0  # amg
+get_ready
+#execute_test 0  # amg
 #execute_test 1  # multigrid
 #execute_test 2  # crystal router
 # post_assemble 0  # amg

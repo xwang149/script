@@ -5,8 +5,9 @@ class Dragonfly(object):
     def __init__(self, router, group, alloc_type, job_rank, num_seed,syn):
         self.num_router_per_group = router
         self.num_group = group
-        self.num_node_per_router = self.num_router_per_group/2
-        self.total_node = self.num_router_per_group*self.num_node_per_router*self.num_group
+        #self.num_node_per_router = self.num_router_per_group/2
+        self.num_node_per_router = 4
+	self.total_node = self.num_router_per_group*self.num_node_per_router*self.num_group
         self.total_router = self.num_router_per_group*self.num_group
         self.job_rank = job_rank
         self.alloc_type = alloc_type
