@@ -8,9 +8,10 @@ APP_PATH=( "/home/xwangiit/workspace/traces/AMG/n1728_dumpi/dumpi-2014.03.03.14.
            "/home/xwangiit/workspace/traces/CR/n100_dumpi/dumpi--2014.04.23.12.12.05-")
 RANK=( 1728 1000 100 )
 SEED=1
-MAX=1
+MAX=10
 INTERVAL_MAX=1
-payload=( 950 30000 30000 )
+MAX_NODE=3456
+payload=( 1000 1000 1000 )
 interval=( 10000 10000 10000)
 bcknodes=( 0 3456 )
 allocation=( "rand_node" )
@@ -26,8 +27,12 @@ do
     nametag[i]="${APP[i]}${RANK[i]}"
     for (( j=0; j<$MAX; j++ ))
     do
-        matrix_payload[$i,$j]=$((${payload[$i]}*($j+1)))
-        #matrix_payload[$i,$j]=$((${payload[$i]}+$j*10000))
+        # matrix_payload[$i,$j]=$((${payload[$i]}*($j+1)))
+        if (( $J != 0 )); then
+            matrix_payload[$i,$j]=$((${payload[$i]}*$j*10))
+        else
+            matrix_payload[$i,$j]=${payload[$i]}
+        fi
     done
     for (( j=0; j<$INTERVAL_MAX; j++ ))
     do
@@ -72,23 +77,23 @@ function get_ready(){
     done
 
     # generate allocation file    
-#    cd ~/workspace/alloclistgen/
-#    for (( i=0; i<${#APP[@]}; i++ ))
-#    do
-#        for (( j=0; j<${#bcknodes[@]}; j++ ))
-#        do    
-#            if [ ${matrix_bcksize[$i,$j]} == 0 ] ; then
-#                ./my_test.py ${RANK[$i]} 0
-#            else
-#                ./my_test.py ${RANK[$i]} ${matrix_bcksize[$i,$j]} 1
-#            fi
-#        done
-#    done
+   cd ~/workspace/alloclistgen/
+   for (( i=0; i<${#APP[@]}; i++ ))
+   do
+       for (( j=0; j<${#bcknodes[@]}; j++ ))
+       do    
+           if [ ${matrix_bcksize[$i,$j]} == 0 ] ; then
+               ./my_test.py ${RANK[$i]} 0
+           else
+               ./my_test.py ${RANK[$i]} ${matrix_bcksize[$i,$j]} 1
+           fi
+       done
+   done
 }
 
 function prepare_all_test(){
     # prepare parameter
-    BCK_NODES=( 0 1056 )
+    BCK_NODES=( 0 $MAX_NODE )
     for (( j=0; j<${#APP[@]}; j++ ))
     do
         BCK_NODES[1]=$((${BCK_NODES[1]}-${RANK[j]}))
@@ -96,7 +101,7 @@ function prepare_all_test(){
     echo "${BCK_NODES[0]} ${BCK_NODES[1]}"
 
     # generate workload file  
-    cd ~/workspace/runtime_conf/wk_conf/
+    cd ~/workspace/script/runtime_conf/wk_conf/
     for (( j=0; j<${#BCK_NODES[@]}; j++ ))
     do       
         if [ ${BCK_NODES[$j]} == 0 ] ; then
@@ -124,7 +129,7 @@ function prepare_all_test(){
     done
 
     # generate allocation file    
-    cd ~/workspace/alloclistgen/
+    cd ~/workspace/script/alloclistgen/
     for (( j=0; j<${#BCK_NODES[@]}; j++ ))
     do    
         if (( ${BCK_NODES[$j]} == 0 )) ; then
@@ -139,22 +144,21 @@ function prepare_all_test(){
 function execute_test(){
     ####   Get APP id ####
     echo "app id is $1"
-    cd ~/workspace/
     for (( q=0; q<${#allocation[@]}; q++ ))
     do
         for (( i=0; i<${#bcknodes[@]}; i++ ))
         do
             if (( ${matrix_bcksize[$1,$i]} == 0 )) ; then        
-                WK_FILE=runtime_conf/wk_conf/trace_${nametag[$1]}.conf
+                WK_FILE=/home/xwangiit/workspace/script/runtime_conf/wk_conf/trace_${nametag[$1]}.conf
                 if [ ${allocation[$q]} == "cont-cons" ]; then
                     LPIO_CONF="--lp-io-dir=${allocation[$q]}-${nametag[$1]}-bck0-l0-i0 --lp-io-use-suffix=1"
-                    ALLOC_FILE=alloclistgen/${allocation[$q]}-alloc-1056-${RANK[$1]}.conf
+                    ALLOC_FILE=/home/xwangiit/workspace/script/alloclistgen/${allocation[$q]}-alloc-$MAX_NODE-${RANK[$1]}.conf
                 else
                     LPIO_CONF="--lp-io-dir=${allocation[$q]}0-${nametag[$1]}-bck0-l0-i0 --lp-io-use-suffix=1"
-                    ALLOC_FILE=alloclistgen/${allocation[$q]}0-alloc-1056-${RANK[$1]}.conf                    
+                    ALLOC_FILE=/home/xwangiit/workspace/script/alloclistgen/${allocation[$q]}0-alloc-$MAX_NODE-${RANK[$1]}.conf                    
                 fi
                 echo "run ${allocation[$q]} test with bcksize=0 payload=0 interval=0"
-                $EXE $FLAG $LPIO_CONF $BCK_CONF --workload_conf_file=$WK_FILE --alloc_file=$ALLOC_FILE $NET_CONFIG
+                mpirun -f $COBALT_NODEFILE -n $PROCS $EXE $FLAG $LPIO_CONF $BCK_CONF --workload_conf_file=$WK_FILE --alloc_file=$ALLOC_FILE $NET_CONFIG
                 wait
                 sleep 10
             else
@@ -162,24 +166,24 @@ function execute_test(){
                 do
                     for (( p=0; p<$INTERVAL_MAX; p++ ))
                     do
-			if [ ${allocation[$q]} == "cont-cons" ]; then
-			    DSEED=1
-			else
+                        if [ ${allocation[$q]} == "cont-cons" ]; then
+                            DSEED=1
+                        else
                             DSEED=$SEED
-			fi
+                        fi
                         for (( j=0; j<$DSEED; j++ ))
                         do
                             BCK_CONF="--mean_interval=${matrix_interval[$1,$p]} --payload_size=${matrix_payload[$1,$k]}"
-                            WK_FILE=runtime_conf/wk_conf/trace_${nametag[$1]}_bck${matrix_bcksize[$1,$i]}.conf
+                            WK_FILE=/home/xwangiit/workspace/script/runtime_conf/wk_conf/trace_${nametag[$1]}_bck${matrix_bcksize[$1,$i]}.conf
                             if [ ${allocation[$q]} == "cont-cons" ]; then
                                 LPIO_CONF="--lp-io-dir=${allocation[$q]}-${nametag[$1]}-bck${matrix_bcksize[$1,$i]}-l${matrix_payload[$1,$k]}-i${matrix_interval[$1,$p]} --lp-io-use-suffix=1"
-                                ALLOC_FILE=alloclistgen/${allocation[$q]}-alloc-1056-${RANK[$1]}_${matrix_bcksize[$1,$i]}.conf
+                                ALLOC_FILE=/home/xwangiit/workspace/script/alloclistgen/${allocation[$q]}-alloc-$MAX_NODE-${RANK[$1]}_${matrix_bcksize[$1,$i]}.conf
                             else
                                 LPIO_CONF="--lp-io-dir=${allocation[$q]}$j-${nametag[$1]}-bck${matrix_bcksize[$1,$i]}-l${matrix_payload[$1,$k]}-i${matrix_interval[$1,$p]} --lp-io-use-suffix=1"
-                                ALLOC_FILE=alloclistgen/${allocation[$q]}$j-alloc-1056-${RANK[$1]}_${matrix_bcksize[$1,$i]}.conf
+                                ALLOC_FILE=/home/xwangiit/workspace/script/alloclistgen/${allocation[$q]}$j-alloc-$MAX_NODE-${RANK[$1]}_${matrix_bcksize[$1,$i]}.conf
                             fi
                             echo "run ${allocation[$q]} test with bcksize=bck${matrix_bcksize[$1,$i]} payload=${matrix_payload[$1,$k]} interval=${matrix_interval[$1,$p]} seed=$j"
-                            $EXE $FLAG $LPIO_CONF $BCK_CONF --workload_conf_file=$WK_FILE --alloc_file=$ALLOC_FILE $NET_CONFIG
+                            mpirun -f $COBALT_NODEFILE -n $PROCS $EXE $FLAG $LPIO_CONF $BCK_CONF --workload_conf_file=$WK_FILE --alloc_file=$ALLOC_FILE $NET_CONFIG
                             wait
                             sleep 10
                         done
@@ -187,12 +191,14 @@ function execute_test(){
                 done
             fi
         done
+        echo "Test is done! APP = ${allocation[$q]}-${nametag[$1]}" | mail -s "codes test" xwang925@gmail.com
     done
+
 }
 
 function execute_all_test(){
     # prepare parameter
-    BCK_NODES=( 0 1056 )
+    BCK_NODES=( 0 $MAX_NODE )
     for (( j=0; j<${#APP[@]}; j++ ))
     do
         BCK_NODES[1]=$((${BCK_NODES[1]}-${RANK[j]}))
@@ -200,7 +206,7 @@ function execute_all_test(){
     echo "${BCK_NODES[0]} ${BCK_NODES[1]}"
 
     declare -a PAYLOADS
-    for i in {0..10}
+    for (( i=0; i<$MAX; i++ ))
     do
         if (( $i != 0 )); then
             PAYLOADS[$i]=$((${payload[0]}*$i*10))
@@ -209,51 +215,46 @@ function execute_all_test(){
         fi
     done
 
-    cd ~/workspace/
-    ##     for continuous allocation and continuous mapping       ###
     for (( q=0; q<${#allocation[@]}; q++ ))
     do
         for (( i=0; i<${#BCK_NODES[@]}; i++ ))
         do
-            if (( ${BCK_NODES[$i]} == 0 )) ; then
-                WK_FILE=runtime_conf/wk_conf/trace_3apps.conf
+            if (( ${matrix_bcksize[$1,$i]} == 0 )) ; then        
+                WK_FILE=/home/xwangiit/workspace/script/runtime_conf/wk_conf/trace_3apps.conf
                 if [ ${allocation[$q]} == "cont-cons" ]; then
-                    LPIO_CONF="--lp-io-dir=${allocation[$q]}-3apps-bck${BCK_NODES[$i]}-l0-i0 --lp-io-use-suffix=1"
-                    ALLOC_FILE=alloclistgen/${allocation[$q]}-alloc-1056-${RANK[0]}_${RANK[1]}_${RANK[2]}.conf
+                    LPIO_CONF="--lp-io-dir=${allocation[$q]}-3apps-bck0-l0-i0 --lp-io-use-suffix=1"
+                    ALLOC_FILE=/home/xwangiit/workspace/script/alloclistgen/${allocation[$q]}-alloc-$MAX_NODE-${RANK[0]}_${RANK[1]}_${RANK[2]}.conf
                 else
-                    LPIO_CONF="--lp-io-dir=${allocation[$q]}0-3apps-bck${BCK_NODES[$i]}-l0-i0 --lp-io-use-suffix=1"
-                    ALLOC_FILE=alloclistgen/${allocation[$q]}0-alloc-1056-${RANK[0]}_${RANK[1]}_${RANK[2]}.conf
-                fi        
-                echo "run ${allocation[$q]} test with bcksize=${BCK_NODES[$i]} payload=0 interval=0"
-                $EXE $FLAG $LPIO_CONF --workload_conf_file=$WK_FILE --alloc_file=$ALLOC_FILE $NET_CONFIG
+                    LPIO_CONF="--lp-io-dir=${allocation[$q]}0-3apps-bck0-l0-i0 --lp-io-use-suffix=1"
+                    ALLOC_FILE=/home/xwangiit/workspace/script/alloclistgen/${allocation[$q]}0-alloc-$MAX_NODE-${RANK[0]}_${RANK[1]}_${RANK[2]}.conf                    
+                fi
+                echo "run ${allocation[$q]} test with bcksize=0 payload=0 interval=0"
+                mpirun -f $COBALT_NODEFILE -n $PROCS $EXE $FLAG $LPIO_CONF $BCK_CONF --workload_conf_file=$WK_FILE --alloc_file=$ALLOC_FILE $NET_CONFIG
                 wait
                 sleep 10
-            else       
-                for (( k=0; k<${#PAYLOADS[@]}; k++ ))
+            else
+                for (( k=0; k<$MAX; k++ ))
                 do
                     for (( p=0; p<$INTERVAL_MAX; p++ ))
                     do
-                        # if [ ${allocation[$q]} == "cont-cons" ] ; then
-                        #     DSEED=1
-                        # else
-                        #     DSEED=$SEED
-                        # fi
-                        DSEED=1
-
+                        if [ ${allocation[$q]} == "cont-cons" ]; then
+                            DSEED=1
+                        else
+                            DSEED=$SEED
+                        fi
                         for (( j=0; j<$DSEED; j++ ))
                         do
-                            BCK_CONF="--mean_interval=${interval[$p]} --payload_size=${PAYLOADS[$k]}"                        
-                            WK_FILE=runtime_conf/wk_conf/trace_3apps_bck${BCK_NODES[$i]}.conf
+                            BCK_CONF="--mean_interval=${interval[0]} --payload_size=${PAYLOADS[$k]}"
+                            WK_FILE=/home/xwangiit/workspace/script/runtime_conf/wk_conf/trace_3apps_bck${BCK_NODES[$i]}.conf
                             if [ ${allocation[$q]} == "cont-cons" ]; then
-                                LPIO_CONF="--lp-io-dir=${allocation[$q]}-3apps-bck${BCK_NODES[$i]}-l${PAYLOADS[$k]}-i${interval[$p]} --lp-io-use-suffix=1"
-                                ALLOC_FILE=alloclistgen/${allocation[$q]}-alloc-1056-${RANK[0]}_${RANK[1]}_${RANK[2]}_${BCK_NODES[$i]}.conf
+                                LPIO_CONF="--lp-io-dir=${allocation[$q]}-${nametag[$1]}-bck${BCK_NODES[$i]}-l${PAYLOADS[$k]}-i${interval[0]} --lp-io-use-suffix=1"
+                                ALLOC_FILE=/home/xwangiit/workspace/script/alloclistgen/${allocation[$q]}-alloc-$MAX_NODE-${RANK[$1]}_${BCK_NODES[$i]}.conf
                             else
-                                LPIO_CONF="--lp-io-dir=${allocation[$q]}$j-3apps-bck${BCK_NODES[$i]}-l${PAYLOADS[$k]}-i${interval[$p]} --lp-io-use-suffix=1"
-                                ALLOC_FILE=alloclistgen/${allocation[$q]}$j-alloc-1056-${RANK[0]}_${RANK[1]}_${RANK[2]}_${BCK_NODES[$i]}.conf
+                                LPIO_CONF="--lp-io-dir=${allocation[$q]}$j-${nametag[$1]}-bck${BCK_NODES[$i]}-l${PAYLOADS[$k]}-i${interval[0]} --lp-io-use-suffix=1"
+                                ALLOC_FILE=/home/xwangiit/workspace/script/alloclistgen/${allocation[$q]}$j-alloc-$MAX_NODE-${RANK[$1]}_${BCK_NODES[$i]}.conf
                             fi
-
-                            echo "run ${allocation[$q]} test with bcksize=${BCK_NODES[$i]} payload=${PAYLOADS[$k]} interval=${interval[$p]} seed=$j"
-                            $EXE $FLAG $LPIO_CONF $BCK_CONF --workload_conf_file=$WK_FILE --alloc_file=$ALLOC_FILE $NET_CONFIG
+                            echo "run ${allocation[$q]} test with bcksize=bck${BCK_NODES[$i]} payload=${PAYLOADS[$k]} interval=${interval[0]} seed=$j"
+                            mpirun -f $COBALT_NODEFILE -n $PROCS $EXE $FLAG $LPIO_CONF $BCK_CONF --workload_conf_file=$WK_FILE --alloc_file=$ALLOC_FILE $NET_CONFIG
                             wait
                             sleep 10
                         done
@@ -261,7 +262,9 @@ function execute_all_test(){
                 done
             fi
         done
+        echo "Test is done! APP = ${allocation[$q]}-3apps" | mail -s "codes test" xwang925@gmail.com
     done
+
 }
 
 function assemble_all(){
