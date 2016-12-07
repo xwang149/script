@@ -4,6 +4,8 @@ from enum import Enum
 class Dragonfly(object):
     def __init__(self, router, group, alloc_type, job_rank, num_seed,syn):
         self.num_router_per_group = router
+        self.num_row = 6
+        self.num_col = 16
         self.num_group = group
         #self.num_node_per_router = self.num_router_per_group/2
         self.num_node_per_router = 4
@@ -50,10 +52,98 @@ class Dragonfly(object):
         elif self.alloc_type == 'op_rand':
             print "Dragonfly Over Provision Random Allocation!"
             self.overprovision_random_alloc()
-        else:
+        elif self.alloc_type == 'rand_chassis':
+            print "Dragonfly "+ self.alloc_type + " Allocation!" 
+            self.rand_chassis()
+        elif self.alloc_type == 'rand_cabinet':
+            print "Dragonfly "+ self.alloc_type + " Allocation!"
+            self.rand_cabinet()
+	else:
             print self.alloc_type +" Function Not Supported Yet!"
             exit()
 
+
+    def rand_chassis(self):
+        num_node_per_chassis = self.num_col*self.num_node_per_router
+	num_chassis = self.num_row*self.num_group
+        if(self.syn==1):
+            app_ranks = self.job_rank[:-1]
+            bck_rank = self.job_rank[-1]
+        else:
+            app_ranks = self.job_rank
+
+        for seed in range(self.num_seed):
+            tmp_filename = self.alloc_file
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            #print self.alloc_file
+            f = open(self.alloc_file+'.conf', 'w')
+            random.seed(seed)
+            chassis_id_list = list(xrange(num_chassis))
+            node_list = range(0, int(self.total_node))
+            for rank in app_ranks:
+                alloc_list = []
+                while(len(alloc_list) < rank):
+                    chassis_id = random.choice(chassis_id_list)
+                    chassis_id_list.remove(chassis_id)
+                    node_id_start = chassis_id*num_node_per_chassis
+                    #print "chassis id: "+str(chassis_id) + " node id start: " + str(node_id_start)
+                    for x in range(num_node_per_chassis):
+                        alloc_list.append(node_id_start+x)
+                alloc_list = alloc_list[:rank]
+                for item in alloc_list:
+                    node_list.remove(item)
+                    f.write("%s " % item)
+                f.write("\n")
+
+            if(self.syn==1):
+                syn_alloc_list = random.sample(node_list, bck_rank)
+                for idx in range(len(syn_alloc_list)):
+                    f.write("%s " % syn_alloc_list[idx])
+                f.write("\n")
+
+            f.closed
+            self.alloc_file= tmp_filename
+
+    def rand_cabinet(self):
+        num_node_per_cabinet = self.num_col*self.num_row/2*self.num_node_per_router
+        num_cabinet = 2*self.num_group
+        if(self.syn==1):
+            app_ranks = self.job_rank[:-1]
+            bck_rank = self.job_rank[-1]
+        else:
+            app_ranks = self.job_rank
+
+        for seed in range(self.num_seed):
+            tmp_filename = self.alloc_file
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            #print self.alloc_file
+            f = open(self.alloc_file+'.conf', 'w')
+            random.seed(seed)
+            cabinet_id_list = list(xrange(num_cabinet))
+            node_list = range(0, int(self.total_node))
+            for rank in app_ranks:
+                alloc_list = []
+                while(len(alloc_list) < rank):
+                    cabinet_id = random.choice(cabinet_id_list)
+                    cabinet_id_list.remove(cabinet_id)
+                    node_id_start = cabinet_id*num_node_per_cabinet
+                    for x in range(num_node_per_cabinet):
+                        alloc_list.append(node_id_start+x)
+                alloc_list = alloc_list[:rank]
+                #  print alloc_list, '\n', len(alloc_list)
+                for item in alloc_list:
+                    node_list.remove(item)
+                    f.write("%s " % item)
+                f.write("\n")
+
+            if(self.syn==1):
+                syn_alloc_list = random.sample(node_list, bck_rank)
+                for idx in range(len(syn_alloc_list)):
+                    f.write("%s " % syn_alloc_list[idx])
+                f.write("\n")
+
+            f.closed
+            self.alloc_file= tmp_filename
 
 
     def cont_alloc(self):
@@ -102,11 +192,14 @@ class Dragonfly(object):
             random.seed(seed)
             router_id_list = list(xrange(self.total_router))
             node_list = range(0, int(self.total_node))
+            print self.total_router
             for rank in app_ranks:
                 alloc_list = []
+                print "rank: "+str(rank)
                 while(len(alloc_list) < rank):
                     router_id = random.choice(router_id_list)
                     router_id_list.remove(router_id)
+                    #print "choose router:"+str(router_id) + "removed? "+str(len(router_id_list))
                     node_id_start = router_id*self.num_node_per_router
                     for x in range(self.num_node_per_router):
                         alloc_list.append(node_id_start+x)
