@@ -58,6 +58,9 @@ class Dragonfly(object):
         elif self.alloc_type == 'rand_cabinet':
             print "Dragonfly "+ self.alloc_type + " Allocation!"
             self.rand_cabinet()
+        elif self.alloc_type == 'cont-rand3d':
+            print "Dragonfly 3d random permutation of Contiguous Allocation"
+            self.cont_rand3d()
 	else:
             print self.alloc_type +" Function Not Supported Yet!"
             exit()
@@ -384,6 +387,51 @@ class Dragonfly(object):
                 f.write("\n")
             f.closed
             self.alloc_file = file_surfix      
+
+    def cont_rand3d(self):
+        for seed in range(self.num_seed):
+            file_surfix = self.alloc_file
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            f = open(self.alloc_file+'.conf', 'w')
+            if(self.syn==0):
+                start = 0
+                for num_rank in self.job_rank:
+                    alloc_list = range(start, start+num_rank)
+                    num_rand_groups = num_rank/6
+                    rand_3d_groups = range(0, int(num_rand_groups))
+                    random.seed(seed)
+                    #  if num_rank == 216:#AMG gets random mapping, others get consecutive mapping
+                    random.shuffle(rand_3d_groups)
+                    for item in rand_3d_groups:
+                        node_start = start+item*6
+                        for i in range(6):
+                            f.write("%s " % int(node_start+i))
+                    #  alloc_list.sort()
+                    f.write("\n")
+                    start += num_rank
+            else:
+                start = 0
+                for num_rank in self.job_rank[:-1]:
+                    alloc_list = range(start, start+num_rank)
+                    num_rand_groups = num_rank/6
+                    rand_3d_groups = range(0, int(num_rand_groups))
+                    random.seed(seed)
+                    #  if num_rank == 216:#AMG gets random mapping, others get consecutive mapping
+                    random.shuffle(rand_3d_groups)
+                    for item in rand_3d_groups:
+                        node_start = start+item*6
+                        for i in range(6):
+                            f.write("%s " % int(node_start+i))
+                    #  alloc_list.sort()
+                    f.write("\n")
+                    start += num_rank
+                node_list = range(start, int(self.total_node))
+                syn_alloc_list = random.sample(node_list, self.job_rank[-1])
+                for idx in range(len(syn_alloc_list)):
+                    f.write("%s " % syn_alloc_list[idx])
+                f.write("\n")
+            f.closed
+            self.alloc_file = file_surfix
 
     def hybrid_alloc(self):
         #  the first 'cont_job_num' jobs get contiguous allocation 
