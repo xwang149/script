@@ -16,6 +16,7 @@ line_style = [ ['blue', '--'], ['red', '--'], ['green', '--'],\
 def comm_time_plot(app, subplot):
     label_size = 12
     fig = plt.figure(subplot)
+    # fig.set_canvas(plt.gcf().canvas)
     ax2 = fig.add_subplot(111)
     bp2 = ax2.boxplot(app.comm_time_data, patch_artist=True)
     for box in bp2['boxes']:
@@ -41,6 +42,7 @@ def comm_time_plot(app, subplot):
     plt.title(title, fontsize = label_size)
     plt.tight_layout()
     plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    # plt.savefig("./" +title+ ".pdf", format='pdf', dpi=1000)
     #  plt.show()
 
 
@@ -62,7 +64,7 @@ def msg_busytime_plot(APP, subplot):
     plt.xticks(fontsize = label_font)
     plt.yticks(fontsize = label_font)
     plt.xlabel('Ranks sorted by Saturated Time', fontsize = label_font)
-    plt.ylabel('Saturated Time(Millisecond) ', fontsize = label_font)
+    plt.ylabel('Saturated Time(Nanosecond) ', fontsize = label_font)
     title = APP.name + '_TerminalLinkSaturatedTime'
     plt.title(title, fontsize = label_font)
     plt.legend(loc = 'best')
@@ -165,7 +167,10 @@ def router_lch_stats_plot(app, subplot):
     #axes.set_ylim([0,160])
     plt.xlabel('Router ID sorted by local channel Saturated time', fontsize=label_font)
     plt.ylabel('Saturated time (Millisecond)', fontsize=label_font)
-    title = app.name + '_LchannelSaturatedTime'
+    if app.name in 'syn':
+        title = 'total_LchannelSaturatedTime'
+    else:
+        title = app.name + '_LchannelSaturatedTime'
     plt.title(title,  fontsize=label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
@@ -195,7 +200,10 @@ def router_lch_traffic_plot(app, subplot):
     #  axes.set_ylim([0,120])
     plt.xlabel('Router ID sorted by local channel traffic', fontsize=label_font)
     plt.ylabel('Traffic Amount(MB)', fontsize=label_font)
-    title = app.name+'-LchannelTraffic'
+    if app.name in 'syn':
+        title = 'total-LchannelTraffic'
+    else:
+        title = app.name+'-LchannelTraffic'
     plt.title(title , fontsize=label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
@@ -220,7 +228,10 @@ def router_gch_stats_plot(app, subplot):
     #axes.set_ylim([0,160])
     plt.xlabel('Router ID sorted by global channel Saturated time', fontsize=label_font)
     plt.ylabel('Saturated time (Millisecond)', fontsize=label_font)
-    title = app.name + '-GchannelSaturatedTime'
+    if app.name in 'syn':
+        title = 'total-GchannelSaturatedTime'
+    else:
+        title = app.name + '-GchannelSaturatedTime'
     plt.title(title , fontsize=label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
@@ -250,7 +261,10 @@ def router_gch_traffic_plot(app, subplot):
     #  axes.set_ylim([0,120])
     plt.xlabel('Router ID sorted by global channel traffic', fontsize=label_font)
     plt.ylabel('Traffic Amount(MB)', fontsize=label_font)
-    title = app.name + '-GchannelTraffic'
+    if app.name in 'syn':
+        title = 'total-GchannelTraffic'
+    else:
+        title = app.name + '-GchannelTraffic'
     plt.title(title , fontsize=label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()

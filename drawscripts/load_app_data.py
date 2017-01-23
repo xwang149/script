@@ -32,9 +32,11 @@ class APP(object):
         self.router_lch_traffic = []
         self.router_gch_traffic = []
 
+        self.router_traffic = []
+
     def load_commtime_data(self, path='.'):
         subprocess.call(shlex.split("./getappfromwkld.sh "+self.name+" "+str(self.hasSyn)))
-        for subdir in sorted(next(os.walk(path))[1], key = lambda x: int(x[x.find("-l")+2:x.find("-i")])):
+        for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
             output_folder=os.path.join(path, subdir)
             load_file = os.path.join(output_folder, self.file_name)
             DATA = np.genfromtxt(load_file, delimiter=None, names=['App', 'appid', 'RANK', 'rankid','lpid', 'nwid', 'nsend', 'nrecv', 'bytesend', 'byterecv','sendtime', 'commtime', 'comptime'])
@@ -43,14 +45,15 @@ class APP(object):
 
     def load_msg_data(self, path='.'):
         subprocess.call(shlex.split("./sep_app_from_wkld.py "+self.name+" "+str(self.hasSyn)))
-        for subdir in sorted(next(os.walk(path))[1], key = lambda x: int(x[x.find("-l")+2:x.find("-i")])):
+        for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
             output_folder=os.path.join(path, subdir)
             load_file = os.path.join(output_folder, self.name+'-msg-stats.csv')
             DATA = np.genfromtxt(load_file, delimiter=None, names=['lpid', 'tid', 'datasize', 'avgpacketlatency','packets', 'avghop', 'busytime'])
             #  busytime = filter(None, DATA['busytime'])
             busytime = DATA['busytime']
             #  busytime.sort()
-            busytime[:] = [x/self.time_scale for x in busytime]
+            # busytime[:] = [x/self.time_scale for x in busytime]
+            busytime[:] = [x for x in busytime]
             self.msg_busytime.append(busytime)
             avghop = DATA['avghop']
             #  avghop.sort()
@@ -67,13 +70,20 @@ class APP(object):
 
     def load_router_stats_data(self, path='.'):
         subprocess.call(shlex.split("./sep_app_router_info.py "+self.name+" "+str(self.hasSyn)))
-        for subdir in sorted(next(os.walk(path))[1], key = lambda x: int(x[x.find("-l")+2:x.find("-i")])):
+        for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
             output_folder=os.path.join(path, subdir)
-            load_file = os.path.join(output_folder, self.name+'_router_stats.csv')
-            DATA = np.genfromtxt(load_file, delimiter=None,\
-                    names=['lpid', 'groupid', 'routerid', 'lc1',\
-                    'lc2', 'lc3', 'lc4', 'lc5', 'lc6'\
-                    'lc7', 'lc8', 'gc1', 'gc2', 'gc3', 'gc4'])
+            if self.name in 'syn':
+                load_file = os.path.join(output_folder, 'dragonfly-router-traffic')
+            else:
+                load_file = os.path.join(output_folder, self.name+'_router_stats.csv')
+            
+            channel_names=['lpid', 'groupid', 'routerid']
+            for i in range(0,96):
+                channel_names.append("lc"+str(i+1))
+            for i in range(0,10):
+                channel_names.append("gc"+str(i+1))    
+
+            DATA = np.genfromtxt(load_file, delimiter=None, names=channel_names)
             data = DATA.view(np.float64).reshape(len(DATA), -1)
             sum_lch = data[:, 3:11].sum(axis=1)
             #  sum_lch = filter(None, sum_lch)
@@ -88,17 +98,17 @@ class APP(object):
             sorted_sum_gch = np.sort( sum_gch )
             self.router_gch_stats.append(sorted_sum_gch)
 
-        print len(self.router_lch_stats), len(self.router_lch_stats[0])
-        print len(self.router_gch_stats), len(self.router_gch_stats[0])
+        # print len(self.router_lch_stats), len(self.router_lch_stats[0])
+        # print len(self.router_gch_stats), len(self.router_gch_stats[0])
 
 
     def make_label(self, path='.'):
-        alloc_type=['rand_node', 'rand_grop', 'rand_rotr', 'cont', 'hyb']
+        alloc_type=['rand_node', 'rand_grop', 'rand_rotr', 'rand_chassis','rand_cabinet','cont', 'hyb']
         # alloc_type=['rand', 'cont', 'cons','hyb', 'perm']
         #  routing_type=['min', 'adp', 'padp']
         # routing_type=[]
         mapping_type=['cons', 'perm']
-        for subdir in sorted(next(os.walk(path))[1], key = lambda x: int(x[x.find("-l")+2:x.find("-i")])):
+        for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
             print subdir
             word_array=subdir.split('-')
             tag = ''
@@ -108,28 +118,39 @@ class APP(object):
                     payload_size += word[1:]
                 for elem in alloc_type:
                     if elem in word:
-                        if elem == 'rand':
-                            tag += word
-                        else:
-                            tag += elem 
+                        # if elem == 'rand':
+                            # tag += word
+                        # else:
+                            # tag += elem
+                        tag += word 
                         tag += '-'
-                if word in mapping_type:
-                    tag += word
-            tag += payload_size
+                for elem in mapping_type:
+                    if elem in word:
+                        tag += word+"-"
+            # tag += payload_size
             tag = tag[:-1]
+            # tag = payload_size[1:]
             self.xlabel.append(tag)
         #  print self.xlabel
 
 
     def load_router_traffic_data(self, path='.'):
         subprocess.call(shlex.split("./sep_app_router_info.py "+self.name+" "+str(self.hasSyn)))
-        for subdir in sorted(next(os.walk(path))[1], key = lambda x: int(x[x.find("-l")+2:x.find("-i")])):
+        index = 0
+        for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
             output_folder=os.path.join(path, subdir)
-            load_file = os.path.join(output_folder, self.name+'_router_traffic.csv')
-            DATA = np.genfromtxt(load_file, delimiter=None,\
-                    names=['lpid', 'groupid', 'routerid', 'lc1',\
-                    'lc2', 'lc3', 'lc4', 'lc5', 'lc6'\
-                    'lc7', 'lc8', 'gc1', 'gc2', 'gc3', 'gc4'])
+            if self.name in 'syn':
+                load_file = os.path.join(output_folder, 'dragonfly-router-traffic')
+            else:
+                load_file = os.path.join(output_folder, self.name+'_router_traffic.csv')
+            
+            channel_names=['lpid', 'groupid', 'routerid']
+            for i in range(0,96):
+                channel_names.append("lc"+str(i+1))
+            for i in range(0,10):
+                channel_names.append("gc"+str(i+1)) 
+
+            DATA = np.genfromtxt(load_file, delimiter=None, names=channel_names)
             data = DATA.view(np.float64).reshape(len(DATA), -1)
             sum_lch = data[:, 3:11].sum(axis=1)
             #  sum_lch = filter(None, sum_lch)
@@ -138,11 +159,19 @@ class APP(object):
             #  yvals = np.arange(len(sorted_sum_lch))/float(len(sorted_sum_lch))
             filtered_sorted_sum_lch=filter(None, sorted_sum_lch)
             self.router_lch_traffic.append(filtered_sorted_sum_lch)
-
+            # np.savetxt("router_lch_traffic.csv", filtered_sorted_sum_lch, delimiter=",")
             sum_gch = data[:, 11:].sum(axis=1)
             sum_gch[:] = [x/self.data_scale for x in sum_gch]
             sorted_sum_gch = np.sort( sum_gch )
             self.router_gch_traffic.append(sorted_sum_gch)
+            # np.savetxt("router_gch_traffic.csv", sorted_sum_gch, delimiter=",")
+            # avg_comm_time = sum(self.comm_time_data[index])/len(self.comm_time_data[index])
+            # avg_lch_traffic = 8*sum(filtered_sorted_sum_lch)/len(filtered_sorted_sum_lch)/avg_comm_time/1000
+            # avg_gch_traffic = 8*sum(sorted_sum_gch)/len(sorted_sum_gch)/avg_comm_time/1000
+            # print subdir+":"
+            # print str(avg_lch_traffic) + "\t" + str(avg_gch_traffic)
+            index += 1;
 
         #  print len(self.router_lch_traffic), len(self.router_lch_traffic[0])
         #  print len(self.router_gch_traffic), len(self.router_gch_traffic[0])
+
