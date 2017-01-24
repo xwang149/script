@@ -41,7 +41,7 @@ def comm_time_plot(app, subplot):
     title = app.name+'_CommunicationTime'
     plt.title(title, fontsize = label_size)
     plt.tight_layout()
-    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.savefig('./'+app.prefix+title+'.eps', format='eps', dpi=1000)
     # plt.savefig("./" +title+ ".pdf", format='pdf', dpi=1000)
     #  plt.show()
 
@@ -69,7 +69,7 @@ def msg_busytime_plot(APP, subplot):
     plt.title(title, fontsize = label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
-    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.savefig('./'+APP.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
 
 def msg_avghop_plot(APP, subplot):
@@ -95,7 +95,7 @@ def msg_avghop_plot(APP, subplot):
     plt.title(title, fontsize = label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
-    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.savefig('./'+APP.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
 
 
@@ -121,7 +121,7 @@ def tlink_traffic_plot(APP, subplot):
     plt.title(title, fontsize = label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
-    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.savefig('./'+ APP.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
 
 
@@ -147,7 +147,7 @@ def msg_latency_plot(APP, subplot):
     plt.title(title, fontsize = label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
-    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.savefig('./'+APP.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
 
 def router_lch_stats_plot(app, subplot):
@@ -174,7 +174,7 @@ def router_lch_stats_plot(app, subplot):
     plt.title(title,  fontsize=label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
-    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.savefig('./'+app.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
 
 def router_lch_traffic_plot(app, subplot):
@@ -207,7 +207,7 @@ def router_lch_traffic_plot(app, subplot):
     plt.title(title , fontsize=label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
-    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.savefig('./'+app.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
 
 
@@ -235,7 +235,7 @@ def router_gch_stats_plot(app, subplot):
     plt.title(title , fontsize=label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
-    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.savefig('./'+ app.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
 
 def router_gch_traffic_plot(app, subplot):
@@ -268,7 +268,7 @@ def router_gch_traffic_plot(app, subplot):
     plt.title(title , fontsize=label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
-    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.savefig('./'+app.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
 
 def wrkld_tlink_saturation_time_plot(wrkld, subplot):

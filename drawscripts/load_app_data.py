@@ -6,10 +6,11 @@ import numpy as np
 import os
 
 class APP(object):
-    def __init__(self, name, color, syn,\
+    def __init__(self, name, prefix, color, syn,\
                 time_scale=1000000,\
                 data_scale=1024*1024):
         self.name = name
+        self.prefix = prefix
         self.color = color[0]
         self.med_color = color[1]
         self.hasSyn = syn
@@ -107,7 +108,7 @@ class APP(object):
         # alloc_type=['rand', 'cont', 'cons','hyb', 'perm']
         #  routing_type=['min', 'adp', 'padp']
         # routing_type=[]
-        mapping_type=['cons', 'perm']
+        mapping_type=['cons', 'perm', 'rand3d']
         for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
             print subdir
             word_array=subdir.split('-')
