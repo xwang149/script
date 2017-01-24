@@ -9,7 +9,7 @@ import os
 import sys
 import shlex
 
-groupsize = 32
+groupsize = 96*4
 routersize = 4
 
 def identify_router_of_app(nwid_list, wkld_router_info):
@@ -19,8 +19,9 @@ def identify_router_of_app(nwid_list, wkld_router_info):
     app_groupid = [int (x) / groupsize for x in app_nwid] 
     app_ingrouprouterid = [int ((x%groupsize)/ routersize) for x in app_nwid]
 
-    #  print app1_nwid
-    #  print app1_groupid
+    # print "app_nwid:\n"
+    # print app_nwid
+     # print app1_groupid
     #  print app1_ingrouprouterid
     #  print len(app1_groupid)
     #  print len(app1_ingrouprouterid)
@@ -49,7 +50,12 @@ def sep_app_router_from_wkld(app_name, path, output_info='stats'):
         wkld_router_file = os.path.join(lp_output_folder, 'dragonfly-router-'+output_info)
         #  print wkld_router_file
         header = open(wkld_router_file, 'r').readline()
-        all_router_data = np.genfromtxt(wkld_router_file, delimiter=None, skip_header=1, names=['lpid', 'groupid', 'routerid', 'lc1', 'lc2', 'lc3','lc4', 'lc5', 'lc6', 'lc7','lc8', 'gc1', 'gc2', 'gc3','gc4'])
+        channel_names=['lpid', 'groupid', 'routerid']
+        for i in range(0,96):
+            channel_names.append("lc"+str(i+1))
+        for i in range(0,10):
+            channel_names.append("gc"+str(i+1))         
+        all_router_data = np.genfromtxt(wkld_router_file, delimiter=None, skip_header=1, names=channel_names)
 
         app_mpi_replay_stats_file = os.path.join(lp_output_folder, app_name+'.csv')
         #  print app_mpi_replay_stats_file
