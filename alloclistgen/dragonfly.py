@@ -61,6 +61,9 @@ class Dragonfly(object):
         elif self.alloc_type == 'cont-rand3d':
             print "Dragonfly 3d random permutation of Contiguous Allocation"
             self.cont_rand3d()
+        elif self.alloc_type == 'randCab-rand3d':
+            print "3d random permutation of random cabinet allocation"
+            self.randCab_rand3d()
 	else:
             print self.alloc_type +" Function Not Supported Yet!"
             exit()
@@ -439,6 +442,68 @@ class Dragonfly(object):
                 f.write("\n")
             f.closed
             self.alloc_file = file_surfix
+
+
+    def randCab_rand3d(self):
+        num_node_per_cabinet = self.num_col*self.num_row/2*self.num_node_per_router
+        num_cabinet = 2*self.num_group
+        if(self.syn==1):
+            app_ranks = self.job_rank[:-1]
+            bck_rank = self.job_rank[-1]
+        else:
+            app_ranks = self.job_rank
+        
+        for seed in range(self.num_seed):
+            tmp_filename = self.alloc_file
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            #print self.alloc_file
+            f = open(self.alloc_file+'.conf', 'w')
+            random.seed(seed)
+            cabinet_id_list = list(xrange(num_cabinet))
+            node_list = range(0, int(self.total_node))
+            for rank in app_ranks:
+                alloc_list = []
+                cab_count = 0
+                while(len(alloc_list) < rank):
+                    cabinet_id = random.choice(cabinet_id_list)
+                    cabinet_id_list.remove(cabinet_id)
+                    node_id_start = cabinet_id*num_node_per_cabinet
+                    cab_count += 1
+                    for x in range(num_node_per_cabinet):
+                        alloc_list.append(node_id_start+x)
+                    alloc_list = alloc_list[:rank]
+                #  print alloc_list, '\n', len(alloc_list)
+                for cab in range(cab_count):
+                    temp_start = cab*num_node_per_cabinet
+                    temp_end = temp_start+num_node_per_cabinet
+                    if(temp_end>rank):
+                        temp_end = rank
+                    temp_alloc_list = alloc_list[temp_start:temp_end]
+                    start = temp_alloc_list[0]
+                    num_rand_groups = len(temp_alloc_list)/6
+                    rand_3d_groups = range(0, int(num_rand_groups))
+                    random.seed(seed)
+                    random.shuffle(rand_3d_groups)
+                    for item in rand_3d_groups:
+                        node_start = start+item*6
+                        for i in range(6):
+                            f.write("%s " % int(node_start+i))
+                            node_list.remove(node_start+i)
+                    if(len(temp_alloc_list)%6>0):
+                        leftover=len(temp_alloc_list)-num_rand_groups*6
+                        for i in alloc_list[0-leftover:]:
+                            f.write("%s " % i)
+                            node_list.remove(i)
+                f.write("\n")
+            if(self.syn==1):
+                syn_alloc_list = random.sample(node_list, bck_rank)
+                for idx in range(len(syn_alloc_list)):
+                    f.write("%s " % syn_alloc_list[idx])
+                f.write("\n")
+            
+            f.closed
+            self.alloc_file= tmp_filename
+
 
     def hybrid_alloc(self):
         #  the first 'cont_job_num' jobs get contiguous allocation 
