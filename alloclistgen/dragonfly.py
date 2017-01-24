@@ -406,7 +406,10 @@ class Dragonfly(object):
                         node_start = start+item*6
                         for i in range(6):
                             f.write("%s " % int(node_start+i))
-                    #  alloc_list.sort()
+                    if(num_rank%6>0):
+                        leftover=num_rank-num_rand_groups*6
+                        for i in alloc_list[0-leftover:]:
+                            f.write("%s " % i)
                     f.write("\n")
                     start += num_rank
             else:
@@ -423,6 +426,10 @@ class Dragonfly(object):
                         for i in range(6):
                             f.write("%s " % int(node_start+i))
                     #  alloc_list.sort()
+                    if(num_rank%6>0):
+                        leftover=num_rank-num_rand_groups*6
+                        for i in alloc_list[0-leftover:]:
+                            f.write("%s " % i)
                     f.write("\n")
                     start += num_rank
                 node_list = range(start, int(self.total_node))
