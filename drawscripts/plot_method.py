@@ -8,9 +8,9 @@ from load_app_data import APP
 from load_wrkld_data import WorkLoad
 
 
-line_width = 3
-line_style = [ ['blue', '--'], ['red', '--'], ['green', '--'],\
-             ['blue', '-'], ['red', '-'], ['green', '-'] ]
+line_width = 2
+# line_style = [ ['blue', '--'],  ['red', '--'],['green', '--'], ['purple','--'], \
+line_style = [ ['blue', '-'], ['red', '-'], ['green', '-'], ['purple','-'] ]
 
 
 def comm_time_plot(app, subplot):
@@ -36,7 +36,7 @@ def comm_time_plot(app, subplot):
     plt.yticks(fontsize = label_size)
     plt.xticks(fontsize = label_size, rotation=30)
     #axes = plt.gca()
-    #axes.set_ylim([800,4000])
+    # ax2.set_ylim([0.16,0.40])
     ax2.set_ylabel("millisecond", fontsize=label_size)
     title = app.name+'_CommunicationTime'
     plt.title(title, fontsize = label_size)
@@ -51,23 +51,23 @@ def msg_busytime_plot(APP, subplot):
     #  print len(APP.msg_busytime), len(APP.xlabel)
     for item in range(len(APP.msg_busytime)):
         #  print "idx is", item
-        APP.msg_busytime[item].sort()
-        plt.plot(APP.msg_busytime[item], label=APP.xlabel[item]
-                #  linewidth=line_width, color=line_style[item][0],\
-                #  linestyle=line_style[item][1])
-                )
+        busytime = APP.msg_busytime[item]
+        busytime.sort()
+        yvals = np.arange(len(busytime))/float(len(busytime))
+        plt.plot(busytime, yvals*100, label=APP.xlabel[item]
+                 )
 
-    label_font = 24
+    label_font = 18
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
     #axes.set_ylim([0,10])
     plt.xticks(fontsize = label_font)
     plt.yticks(fontsize = label_font)
-    plt.xlabel('Ranks sorted by Saturated Time', fontsize = label_font)
-    plt.ylabel('Saturated Time(Nanosecond) ', fontsize = label_font)
+    plt.xlabel('Saturated Time(Millisecond)', fontsize = label_font)
+    plt.ylabel('Percentage of Ranks', fontsize = label_font)
     title = APP.name + '_TerminalLinkSaturatedTime'
     plt.title(title, fontsize = label_font)
-    plt.legend(loc = 'best')
+    plt.legend(loc = 'lower right')
     plt.tight_layout()
     plt.savefig('./'+APP.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
@@ -77,23 +77,25 @@ def msg_avghop_plot(APP, subplot):
     #  print len(APP.msg_avg_hop), len(APP.xlabel)
     for item in range(len(APP.msg_avg_hop)):
         #  print "idx is", item
-        APP.msg_avg_hop[item].sort()
-        plt.plot(APP.msg_avg_hop[item], label=APP.xlabel[item] 
-                #  linewidth=line_width, color=line_style[item][0],\
-                #  linestyle=line_style[item][1]
-                )
+        avg_hop = APP.msg_avg_hop[item]
+        avg_hop.sort()
+        yvals = np.arange(len(avg_hop))/float(len(avg_hop))
+        plt.plot(avg_hop, yvals*100, label=APP.xlabel[item]
+                ,linewidth=line_width, color=line_style[item][0],\
+                linestyle=line_style[item][1]
+                 )
 
-    label_font = 24
+    label_font = 18
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
     #axes.set_ylim([0,10])
     plt.xticks(fontsize = label_font)
     plt.yticks(fontsize = label_font)
-    plt.xlabel('Ranks sorted by Msg Avg Hop', fontsize = label_font)
-    plt.ylabel('Avg Hops ', fontsize = label_font)
+    plt.xlabel('Msg Avg Hop', fontsize = label_font)
+    plt.ylabel('Percentage of Msgs', fontsize = label_font)
     title = APP.name + '_RankAvgHop'
     plt.title(title, fontsize = label_font)
-    plt.legend(loc = 'best')
+    plt.legend(loc = 'lower right')
     plt.tight_layout()
     plt.savefig('./'+APP.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
@@ -104,22 +106,24 @@ def tlink_traffic_plot(APP, subplot):
     plt.figure(subplot)
     #  print len(APP.msg_latency), len(APP.xlabel)
     for item in range(len(APP.tlink_traffic)):
-        #  print "idx is", item
-        APP.tlink_traffic[item].sort()
-        plt.plot(APP.tlink_traffic[item], label=APP.xlabel[item], linewidth=line_width )
+        tlink_traffic = APP.tlink_traffic[item]
+        tlink_traffic.sort()
+        yvals = np.arange(len(tlink_traffic))/float(len(tlink_traffic))
+        plt.plot(tlink_traffic, yvals*100, label=APP.xlabel[item]
+                 )
 
-    label_font = 24
+    label_font = 18
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
     #axes.set_ylim([0,10])
     plt.xticks(fontsize = label_font)
     plt.yticks(fontsize = label_font)
-    plt.xlabel('Ranks sorted by Terminal Traffic', fontsize = label_font)
-    plt.ylabel('Data Amount (MB) ', fontsize = label_font)
+    plt.xlabel('Terminal Traffic Amount (MB)', fontsize = label_font)
+    plt.ylabel('Percentage of Terminal Links', fontsize = label_font)
     title = APP.name + '_TlinkTraffic'
     #  plt.title(APP.name + '\n MPI Rank transfer latency(total_time/num_packet)', fontsize = label_font)
     plt.title(title, fontsize = label_font)
-    plt.legend(loc = 'best')
+    plt.legend(loc = 'lower right')
     plt.tight_layout()
     plt.savefig('./'+ APP.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
@@ -130,22 +134,26 @@ def msg_latency_plot(APP, subplot):
     plt.figure(subplot)
     #  print len(APP.msg_latency), len(APP.xlabel)
     for item in range(len(APP.msg_latency)):
-        #  print "idx is", item
-        APP.msg_latency[item].sort()
-        plt.plot(APP.msg_latency[item], label=APP.xlabel[item], linewidth=line_width )
+        msg_latency = APP.msg_latency[item]
+        msg_latency.sort()
+        yvals = np.arange(len(msg_latency))/float(len(msg_latency))
+        plt.plot(msg_latency, yvals*100, label=APP.xlabel[item]
+                ,linewidth=line_width, color=line_style[item][0],\
+                linestyle=line_style[item][1]
+                 )
 
-    label_font = 24
+    label_font = 18
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
     #axes.set_ylim([0,10])
     plt.xticks(fontsize = label_font)
     plt.yticks(fontsize = label_font)
-    plt.xlabel('Ranks sorted by Msg Latency', fontsize = label_font)
-    plt.ylabel('Latency (Millisecond) ', fontsize = label_font)
+    plt.xlabel('Msg Latency (Millisecond)', fontsize = label_font)
+    plt.ylabel('Percentage of Ranks', fontsize = label_font)
     title = APP.name + '_MsgLatency'
     #  plt.title(APP.name + '\n MPI Rank transfer latency(total_time/num_packet)', fontsize = label_font)
     plt.title(title, fontsize = label_font)
-    plt.legend(loc = 'best')
+    plt.legend(loc = 'lower right')
     plt.tight_layout()
     plt.savefig('./'+APP.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
@@ -153,26 +161,28 @@ def msg_latency_plot(APP, subplot):
 def router_lch_stats_plot(app, subplot):
     plt.figure(subplot)
     for item in range(len(app.router_lch_stats)):
-        plt.plot(app.router_lch_stats[item], label=app.xlabel[item]
-                #  linewidth=line_width, color=line_style[item][0],\
-                #  linestyle=line_style[item][1])
+        lch_stats = app.router_lch_stats[item]
+        lch_stats.sort()
+        yvals = np.arange(len(lch_stats))/float(len(lch_stats))
+        plt.plot(lch_stats, yvals*100, label=app.xlabel[item]
+                ,linewidth=line_width, color=line_style[item][0],\
+                linestyle=line_style[item][1]
                 )
-
-
-    label_font = 24
+    
+    label_font = 18
     plt.xticks(fontsize=label_font)
     plt.yticks(fontsize=label_font)
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
-    #axes.set_ylim([0,160])
-    plt.xlabel('Router ID sorted by local channel Saturated time', fontsize=label_font)
-    plt.ylabel('Saturated time (Millisecond)', fontsize=label_font)
+    # axes.set_ylim([0,25])
+    plt.xlabel('Saturated time (Millisecond)', fontsize=label_font)
+    plt.ylabel('Percentage of Routers', fontsize=label_font)
     if app.name in 'syn':
         title = 'total_LchannelSaturatedTime'
     else:
         title = app.name + '_LchannelSaturatedTime'
     plt.title(title,  fontsize=label_font)
-    plt.legend(loc = 'best')
+    plt.legend(loc = 'lower right')
     plt.tight_layout()
     plt.savefig('./'+app.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
@@ -181,23 +191,40 @@ def router_lch_traffic_plot(app, subplot):
     plt.figure(subplot)
     maxlen = 0
     for elem in app.router_lch_traffic:
-        if maxlen < len(elem):
-            maxlen = len(elem)
+       if maxlen < len(elem):
+           maxlen = len(elem)
 
     for item in range(len(app.router_lch_traffic)):
-        router_lch_traffic = [None]*(maxlen-len(app.router_lch_traffic[item]))+ \
-                            app.router_lch_traffic[item]
-        plt.plot(router_lch_traffic, label=app.xlabel[item]
-                #  linewidth=line_width, color=line_style[item][0],\
-                #  linestyle=line_style[item][1])
+       print len(app.router_lch_traffic[item]), app.router_lch_traffic[item][0], app.router_lch_traffic[item][len(app.router_lch_traffic[item])-1]
+       router_lch_traffic = [None]*(maxlen-len(app.router_lch_traffic[item]))+ \
+                           app.router_lch_traffic[item]
+       print len(router_lch_traffic), router_lch_traffic[0], router_lch_traffic[len(router_lch_traffic)-1]
+       plt.plot(router_lch_traffic, label=app.xlabel[item]
+                ,linewidth=line_width, color=line_style[item][0],\
+                linestyle=line_style[item][1]
+    # for item in range(len(app.router_lch_traffic)):
+    #     lch_traffic = app.router_lch_traffic[item]
+    #     lch_traffic.sort()
+    #     yvals = np.arange(len(lch_traffic))/float(len(lch_traffic))
+    #     plt.plot(lch_traffic, yvals*100, label=app.xlabel[item]
                 )
 
-    label_font = 24
+    label_font = 18
     plt.xticks(fontsize=label_font)
     plt.yticks(fontsize=label_font)
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
-    #  axes.set_ylim([0,120])
+    # axes.set_ylim([10,100])
+    # plt.xlabel('Traffic Amount(MB)', fontsize=label_font)
+    # plt.ylabel('Percentage of Routers', fontsize=label_font)
+    # if app.name in 'syn':
+    #     title = 'total-LchannelTraffic'
+    # else:
+    #     title = app.name+'-LchannelTraffic'
+    # plt.title(title , fontsize=label_font)
+    # plt.legend(loc = 'lower right')
+    # plt.tight_layout()
+    # plt.savefig('./'+app.prefix + title+'.eps', format='eps', dpi=1000)
     plt.xlabel('Router ID sorted by local channel traffic', fontsize=label_font)
     plt.ylabel('Traffic Amount(MB)', fontsize=label_font)
     if app.name in 'syn':
@@ -207,7 +234,7 @@ def router_lch_traffic_plot(app, subplot):
     plt.title(title , fontsize=label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
-    plt.savefig('./'+app.prefix + title+'.eps', format='eps', dpi=1000)
+    plt.savefig('./'+app.prefix +title+'.eps', format='eps', dpi=1000)
     #  plt.show()
 
 
@@ -215,50 +242,69 @@ def router_lch_traffic_plot(app, subplot):
 def router_gch_stats_plot(app, subplot):
     plt.figure(subplot)
     for item in range(len(app.router_gch_stats)):
-        plt.plot(app.router_gch_stats[item], label=app.xlabel[item]
-                #  linewidth=line_width, color=line_style[item][0],\
-                #  linestyle=line_style[item][1])
+        gch_stats = app.router_gch_stats[item]
+        gch_stats.sort()
+        yvals = np.arange(len(gch_stats))/float(len(gch_stats))
+        plt.plot(gch_stats, yvals*100, label=app.xlabel[item]
+                ,linewidth=line_width, color=line_style[item][0],\
+                linestyle=line_style[item][1]
                 )
 
-    label_font = 24
+    label_font = 18
     plt.xticks(fontsize=label_font)
     plt.yticks(fontsize=label_font)
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
     #axes.set_ylim([0,160])
-    plt.xlabel('Router ID sorted by global channel Saturated time', fontsize=label_font)
-    plt.ylabel('Saturated time (Millisecond)', fontsize=label_font)
+    plt.xlabel('Saturated time (Millisecond)', fontsize=label_font)
+    plt.ylabel('Percentage of Routers', fontsize=label_font)
     if app.name in 'syn':
         title = 'total-GchannelSaturatedTime'
     else:
         title = app.name + '-GchannelSaturatedTime'
     plt.title(title , fontsize=label_font)
-    plt.legend(loc = 'best')
+    plt.legend(loc = 'lower right')
     plt.tight_layout()
     plt.savefig('./'+ app.prefix + title+'.eps', format='eps', dpi=1000)
     #  plt.show()
+
 
 def router_gch_traffic_plot(app, subplot):
     plt.figure(subplot)
     maxlen = 0
     for elem in app.router_gch_traffic:
-        if maxlen < len(elem):
-            maxlen = len(elem)
+       if maxlen < len(elem):
+           maxlen = len(elem)
 
     for item in range(len(app.router_gch_traffic)):
+        # gch_traffic = app.router_gch_traffic[item]
+        # gch_traffic.sort()
+        # yvals = np.arange(len(gch_traffic))/float(len(gch_traffic))
+        # plt.plot(gch_traffic, yvals*100, label=app.xlabel[item]
         router_gch_traffic = [None]*(maxlen-len(app.router_gch_traffic[item]))+ \
                             app.router_gch_traffic[item].tolist()
+        # print router_gch_traffic
         plt.plot(router_gch_traffic, label=app.xlabel[item]
-                #  linewidth=line_width, color=line_style[item][0],\
-                #  linestyle=line_style[item][1])
+                ,linewidth=line_width, color=line_style[item][0],\
+                linestyle=line_style[item][1]
                 )
 
-    label_font = 24
+    label_font = 18
     plt.xticks(fontsize=label_font)
     plt.yticks(fontsize=label_font)
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
     #  axes.set_ylim([0,120])
+    # plt.xlabel('Traffic Amount(MB)', fontsize=label_font)
+    # plt.ylabel('Percentage of Routers', fontsize=label_font)
+    # if app.name in 'syn':
+    #     title = 'total-GchannelTraffic'
+    # else:
+    #     title = app.name + '-GchannelTraffic'
+    # plt.title(title , fontsize=label_font)
+    # plt.legend(loc = 'lower right')
+    # plt.tight_layout()
+    # plt.savefig('./'+app.prefix + title+'.eps', format='eps', dpi=1000)
     plt.xlabel('Router ID sorted by global channel traffic', fontsize=label_font)
     plt.ylabel('Traffic Amount(MB)', fontsize=label_font)
     if app.name in 'syn':
@@ -268,7 +314,7 @@ def router_gch_traffic_plot(app, subplot):
     plt.title(title , fontsize=label_font)
     plt.legend(loc = 'best')
     plt.tight_layout()
-    plt.savefig('./'+app.prefix + title+'.eps', format='eps', dpi=1000)
+    plt.savefig('./'+app.prefix+title+'.eps', format='eps', dpi=1000)
     #  plt.show()
 
 def wrkld_tlink_saturation_time_plot(wrkld, subplot):

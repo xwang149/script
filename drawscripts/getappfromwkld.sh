@@ -11,8 +11,10 @@ do
     if (( $syn==1 )); then
     	grep "APP 1" mpi-replay-stats > syn.csv
     fi
-    # grep "APP 1" mpi-replay-stats > mg.csv
-    # grep "APP 2" mpi-replay-stats > cr.csv
+   # grep "APP 0" mpi-replay-stats > amg.csv
+   # grep "APP 1" mpi-replay-stats > cr.csv
+   # grep "APP 2" mpi-replay-stats > cr.csv
+
     cd ../
     
 done
