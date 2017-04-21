@@ -10,16 +10,16 @@ hasSyn=int(sys.argv[-1])
 print jobrank_list
 # jobrank_list = [216, 840]
 #Dragonfly(96, 9, 'rand_rotr', jobrank_list, 1,hasSyn)
-#Dragonfly(96,9,'rand_chassis',jobrank_list,1,hasSyn)
+Dragonfly(96,9,'rand_chassis',jobrank_list,1,hasSyn)
 Dragonfly(96,9,'rand_cabinet',jobrank_list,1,hasSyn)
 #Dragonfly(8, 33, 'rand_part', jobrank_list, 1)
-#Dragonfly(96, 9, 'rand_grop', jobrank_list, 1,hasSyn)
-#Dragonfly(96, 9, 'rand_node', jobrank_list, 1,hasSyn)
+Dragonfly(96, 9, 'rand_grop', jobrank_list, 1,hasSyn)
+Dragonfly(96, 9, 'rand_node', jobrank_list, 1,hasSyn)
 #Dragonfly(96, 5, 'hyb', jobrank_list, 10,hasSyn)
 #Dragonfly(96, 9, 'cont-perm', jobrank_list, 1,hasSyn)
-#Dragonfly(96, 9, 'cont-cons', jobrank_list, 1,hasSyn)
+Dragonfly(96, 9, 'cont-cons', jobrank_list, 1,hasSyn)
 #Dragonfly(96, 9, 'cont-rand3d', jobrank_list, 1, hasSyn)
-Dragonfly(96, 9, 'randCab-rand3d', jobrank_list, 1, hasSyn)
+#Dragonfly(96, 9, 'randCab-rand3d', jobrank_list, 1, hasSyn)
 
 #  single_job = [[100]]
 #  for item in single_job:
