@@ -98,4 +98,25 @@ if __name__ == "__main__":
 
         pmd.plt.close()
 
+    else:
+        oth = APP(app, prefix, ['cyan', 'teal'], hasSyn)
+
+        oth.load_commtime_data('.')
+        pmd.comm_time_plot(oth, 30)
+
+        oth.load_msg_data()
+        pmd.msg_busytime_plot(oth,31)
+        pmd.msg_avghop_plot(oth, 32)
+        pmd.msg_latency_plot(oth,33)
+        # pmd.tlink_traffic_plot(amg, 18)
+
+        oth.load_router_stats_data()
+        pmd.router_lch_stats_plot(oth, 34)
+        pmd.router_gch_stats_plot(oth, 35)
+
+        oth.load_router_traffic_data()
+        pmd.router_gch_traffic_plot(oth, 36)
+        pmd.router_lch_traffic_plot(oth, 37)
+
+        pmd.plt.close()
     # pmd.plt.show()
