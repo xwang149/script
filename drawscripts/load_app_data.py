@@ -25,20 +25,32 @@ class APP(object):
         self.msg_busytime = []
         self.msg_avg_hop = []
         self.msg_latency = []
+        self.msg_maxlatency = []
         self.msg_hopbytes = []
         self.tlink_traffic = []
 
         self.router_lch_stats =[]
         self.router_gch_stats =[]
+        
+        self.router_lch_sat = []
+        self.router_gch_sat = []
+
+        self.router_lch_load = []
+        self.router_gch_load = []
 
         self.router_lch_traffic = []
         self.router_gch_traffic = []
+
+        self.router_tlink_traffic = []
+        self.router_tlink_stats = []
 
         self.router_traffic = []
 
     def load_commtime_data(self, path='.'):
         subprocess.call(shlex.split("./getappfromwkld.sh "+self.name+" "+str(self.hasSyn)))
+        print 'comm time: '
         for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
+            print subdir
             output_folder=os.path.join(path, subdir)
             load_file = os.path.join(output_folder, self.file_name)
             DATA = np.genfromtxt(load_file, delimiter=None, names=['App', 'appid', 'RANK', 'rankid','lpid', 'nwid', 'nsend', 'nrecv', 'bytesend', 'byterecv','sendtime', 'commtime', 'comptime'])
@@ -73,13 +85,18 @@ class APP(object):
             latency = DATA['avgpacketlatency']
             latency[:] = [x/self.time_scale for x in latency]
             self.msg_latency.append(latency)
-        
-        print self.msg_hopbytes
 
+            # maxlatency = DATA['maxlatency']
+            # maxlatency[:] = [x/self.time_scale for x in latency]
+            # self.msg_maxlatency.append(latency)
+        
+        # print self.msg_hopbytes
 
     def load_router_stats_data(self, path='.'):
         subprocess.call(shlex.split("./sep_app_router_info.py "+self.name+" "+str(self.hasSyn)))
+        print 'router stats:'
         for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
+            print subdir
             output_folder=os.path.join(path, subdir)
             if self.name in 'syn':
                 load_file = os.path.join(output_folder, 'dragonfly-router-stats')
@@ -87,42 +104,75 @@ class APP(object):
                 load_file = os.path.join(output_folder, self.name+'_router_stats.csv')
             
             channel_names=['lpid', 'groupid', 'routerid']
-            for i in range(0,34):
+            for i in range(0,96):
                 channel_names.append("lc"+str(i+1))
             for i in range(0,10):
                 channel_names.append("gc"+str(i+1)) 
-            for i in range(0,4):
-                channel_names.append("tc"+str(i+1))   
-
+            # for i in range(0,4):
+            #     channel_names.append("tc"+str(i+1))   
             DATA = np.genfromtxt(load_file, delimiter=None, names=channel_names)
             data = DATA.view(np.float64).reshape(len(DATA), -1)
-            sum_lch = data[:, 3:37].sum(axis=1)
-            #  sum_lch = filter(None, sum_lch)
+
+            sum_lch = data[:, 3:99].sum(axis=1)
+            max_lch = data[:, 3:99].max(axis=1)
+            # sum_lch = filter(None, sum_lch)
             sum_lch = [x/self.time_scale for x in sum_lch]
             sorted_sum_lch = np.sort(sum_lch)
+
             #  yvals = np.arange(len(sorted_sum_lch))/float(len(sorted_sum_lch))
             #  filtered_sorted_sum_lch=filter(None, sorted_sum_lch)
-            self.router_lch_stats.append(sorted_sum_lch)
-            # print data[0, 99:]
-            sum_gch = data[:, 37:47].sum(axis=1)
+            # self.router_lch_stats.append(sorted_sum_lch)
+
+            sum_gch = data[:, 99:109].sum(axis=1)
+            max_gch = data[:, 99:109].max(axis=1)
             sum_gch[:] = [x/self.time_scale for x in sum_gch]
-            sorted_sum_gch = np.sort( sum_gch )
+            sorted_sum_gch = np.sort(sum_gch)
+
+            # sum_tch = data[:, 47:51].sum(axis=1)
+            # sum_tch[:] = [x/self.time_scale for x in sum_tch]
+            # sorted_sum_tch = np.sort(sum_tch)
+            # self.router_tlink_stats.append(sorted_sum_tch)
+
+            print "max lch: %.5f max gch: %.5f" % (max(max_lch)/self.time_scale, max(max_gch)/self.time_scale)
+
+            self.router_lch_stats.append(sorted_sum_lch)
             self.router_gch_stats.append(sorted_sum_gch)
+
+            lch = list(data[:,3:99].flat)
+            lch = [x/self.time_scale for x in lch]
+            gch = list(data[:, 99:109].flat)
+            gch = [x/self.time_scale for x in gch]
+
+            # #padding with len(data)
+            # if(len(lch) < len(data)):
+            #     lch = [0.0]*(len(data)-len(lch)) + lch
+
+            # if(len(gch) < len(data)):
+            #     gch = [0.0]*(len(data)-len(gch)) + gch
+
+            # sorted_lch = np.sort(lch)
+            # sorted_gch = np.sort(gch)
+            self.router_lch_sat.append(lch)
+            self.router_gch_sat.append(gch)
+            
 
         # print len(self.router_lch_stats), len(self.router_lch_stats[0])
         # print len(self.router_gch_stats), len(self.router_gch_stats[0])
-
+        # print len(self.router_tlink_stats), len(self.router_tlink_stats[0])
 
     def make_label(self, path='.'):
         alloc_type=['rand_node', 'rand_grop', 'rand_rotr', 'rand_chassis','rand_cabinet','cont', 'hyb', 'randCab']
         # alloc_type=['rand', 'cont', 'cons','hyb', 'perm']
-        routing_type=['(min', 'adp', 'padp']
+        routing_type=['(min', 'adp', 'padp', 'nonm']
+        app_name=['2pt', '6pt', 'z14pt']
         # routing_type=[]
         # mapping_type=['cons', 'perm', 'rand3d']
+        print 'labels: '
         for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
             print subdir
             word_array=subdir.split('-')
             tag = ''
+            name=''
             payload_size = '-msg'
             for word in word_array:
                 if('l' in word):
@@ -133,25 +183,35 @@ class APP(object):
                             # tag += word
                         # else:
                             # tag += elem
-                        tag += word
+                        final = word.replace("0","")
+                        final = final.replace("rand_node","rand")
+                        final = final.replace("rand_cabinet","cab")
+                        final = final.replace("rand_chassis","chas")
+                        tag += final
                         tag += '-'
                 # for elem in mapping_type:
                 #     if elem in word:
                 #         tag += word+"-"
                 for elem in routing_type:
                     if elem == word:
-                        tag += word.replace("(","")+"-"
+                        final = word.replace("(","")
+                        tag += final+"-"
+                # for elem in app_name:
+                #     if elem == word:
+                #         name +="("+word.replace("z","")+")"
             # tag += payload_size
+            # tag += 'adp '+name+'-'
             tag = tag[:-1]
             # tag = payload_size[1:]
             self.xlabel.append(tag)
         #  print self.xlabel
 
-
     def load_router_traffic_data(self, path='.'):
         subprocess.call(shlex.split("./sep_app_router_info.py "+self.name+" "+str(self.hasSyn)))
         index = 0
+        print 'traffic: '
         for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
+            print subdir
             output_folder=os.path.join(path, subdir)
             if self.name in 'syn':
                 load_file = os.path.join(output_folder, 'dragonfly-router-traffic')
@@ -159,16 +219,25 @@ class APP(object):
                 load_file = os.path.join(output_folder, self.name+'_router_traffic.csv')
             
             channel_names=['lpid', 'groupid', 'routerid']
-            for i in range(0,34):
+            for i in range(0,96):
                 channel_names.append("lc"+str(i+1))
             for i in range(0,10):
                 channel_names.append("gc"+str(i+1)) 
-            for i in range(0,4):
-                channel_names.append("tc"+str(i+1))
+            # for i in range(0,4):
+            #     channel_names.append("tc"+str(i+1))
 
             DATA = np.genfromtxt(load_file, delimiter=None, names=channel_names)
             data = DATA.view(np.float64).reshape(len(DATA), -1)
-            sum_lch = data[:, 3:37].sum(axis=1)
+
+            # data[:] = [0.0 for y in data for x in y if x > 9999999999]
+            for x in range(0,len(data)):
+                for y in range(0, len(data[x])):
+                    if (self.name=='amg' and data[x,y] > 999999):
+                        # print data[x,y]
+                        data[x,y] = 0.0
+
+
+            sum_lch = data[:, 3:99].sum(axis=1)
             #  sum_lch = filter(None, sum_lch)
             sum_lch = [x/self.data_scale for x in sum_lch]
             sorted_sum_lch = np.sort(sum_lch)
@@ -176,10 +245,24 @@ class APP(object):
             filtered_sorted_sum_lch=filter(None, sorted_sum_lch)
             self.router_lch_traffic.append(filtered_sorted_sum_lch)
             # np.savetxt("router_lch_traffic.csv", filtered_sorted_sum_lch, delimiter=",")
-            sum_gch = data[:, 37:47].sum(axis=1)
+            sum_gch = data[:, 99:109].sum(axis=1)
             sum_gch[:] = [x/self.data_scale for x in sum_gch]
             sorted_sum_gch = np.sort( sum_gch )
             self.router_gch_traffic.append(sorted_sum_gch)
+
+            lch = list(data[:,3:99].flat)
+            lch = [x/self.time_scale for x in lch]
+            gch = list(data[:, 99:109].flat)
+            gch = [x/self.time_scale for x in gch]
+            # sorted_lch = np.sort(lch)
+            # sorted_gch = np.sort(gch)
+            self.router_lch_load.append(lch)
+            self.router_gch_load.append(gch)
+
+            # sum_tch = data[:, 47:51].sum(axis=1)
+            # sum_tch[:] = [x/self.data_scale for x in sum_tch]
+            # sorted_sum_tch = np.sort( sum_tch )
+            # self.router_tlink_traffic.append(sorted_sum_tch)
             # np.savetxt("router_gch_traffic.csv", sorted_sum_gch, delimiter=",")
             # avg_comm_time = sum(self.comm_time_data[index])/len(self.comm_time_data[index])
             # avg_lch_traffic = 8*sum(filtered_sorted_sum_lch)/len(filtered_sorted_sum_lch)/avg_comm_time/1000
@@ -188,6 +271,6 @@ class APP(object):
             # print str(avg_lch_traffic) + "\t" + str(avg_gch_traffic)
             index += 1;
 
-        # print len(self.router_lch_traffic), len(self.router_lch_traffic[0])
+        # print len(self.router_lch_load), len(self.router_lch_load[0])
         # print len(self.router_gch_traffic), len(self.router_gch_traffic[0])
 

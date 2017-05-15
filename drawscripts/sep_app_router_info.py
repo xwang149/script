@@ -41,9 +41,6 @@ def identify_router_of_app(nwid_list, wkld_router_info):
     return app_matrix
 
 
-
-
-
 def sep_app_router_from_wkld(app_name, path, output_info='stats'):
     for subdir in next(os.walk(path))[1]:
         lp_output_folder = os.path.join(path, subdir)
@@ -51,12 +48,12 @@ def sep_app_router_from_wkld(app_name, path, output_info='stats'):
         #  print wkld_router_file
         header = open(wkld_router_file, 'r').readline()
         channel_names=['lpid', 'groupid', 'routerid']
-        for i in range(0,34):
+        for i in range(0,96):
             channel_names.append("lc"+str(i+1))
         for i in range(0,10):
             channel_names.append("gc"+str(i+1)) 
-        for i in range(0,4):
-            channel_names.append("tc"+str(i+1))        
+        # for i in range(0,4):
+        #     channel_names.append("tc"+str(i+1))        
         all_router_data = np.genfromtxt(wkld_router_file, delimiter=None, skip_header=1, names=channel_names)
 
         app_mpi_replay_stats_file = os.path.join(lp_output_folder, app_name+'.csv')

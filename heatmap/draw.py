@@ -12,7 +12,7 @@ RADIX=48
 LChannel=34
 GChannel=10
 Terminal=4
-label_size = 20
+label_size = 25
 
 def readMPI(file_name):
 
@@ -24,6 +24,10 @@ def readMPI(file_name):
 
     wlf = open("mpi-op-logs-"+file_name, "r")
     z = [ [ 0.0 for y in range( rank ) ] for x in range( rank ) ]
+    count = 0
+    count1 = 0
+    count2 = 0
+    count3 = 0
     for line in wlf:
         line = line.strip('\n')
         line = line.strip('\r')
@@ -49,6 +53,22 @@ def readMPI(file_name):
         mpi_op["msg_sz"].append(msg_size)
         mpi_op["time"].append(time)
         z[dst_rank][src_rank] += msg_size
+        count += 1
+
+        chas_id1 = src_rank / 64
+        chas_id2 = dst_rank / 64
+        cab1 = src_rank / 192
+        cab2 = dst_rank / 192
+        grop1 = src_rank / 384
+        grop2 = dst_rank / 384
+        if (chas_id1 != chas_id2):
+            count1 += 1
+        if (cab1 != cab2):
+            count2 += 1
+        if (grop1 != grop2):
+            count3 += 1
+
+    print "Total sends: %d, cross group: %d, cross chas: %d, cross cab: %d" %(count, count3, count1, count2)
 
     wlf.close()
     return mpi_op, z, end_time
@@ -113,54 +133,65 @@ def drawMsgmap(prefix, mpi_op, time_interval, end_time):
 
     total_msg = sum(msg_load)
     peak_load = np.max(avg_load)*1000.0*1000.0*1000.0/bin_sz/1024.0/1024.0    # GB/s
-    print peak_load
+    peakmax_load = np.max(avg_load)    # KB
+    bot_load = np.min(avg_load)
+    top_load = np.max(avg_load)
+    print 'Peak avg load: %.5f GB/s' % (peak_load)
     print 'Total '+ format(total_msg, '.5f') +'KB ( '+ format(np.max(avg_load), '.5f')+' KB/'+ str(bin_sz) +'ns)'
+    # print 'min avg: %d  max avg: %d' %(bot_load, top_load)
+    print 'peak avg load: %.5f KB / %d ns' % (peakmax_load, bin_sz)
+    temp = sorted(avg_load)
+    print temp[0:20]
 
     width = bin_sz/1000.0/1000.0
-    fig = plt.figure(11)
-    ax = fig.add_subplot(111)
-    ax.set_xlabel('Time (millisecond)', fontsize = label_size)
-    ax.set_ylabel('Total message load (KB)', fontsize = label_size)
-    ax.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
-    plt.bar(bins, msg_load, width, color="blue", linewidth=0.5)
-    plt.locator_params(axis='x', nbins=8)
-    plt.xticks(fontsize=label_size)
-    plt.yticks(fontsize=label_size)
-    title = prefix +'_Message_Load'
-    # plt.title(title, fontsize = label_size)
-    plt.tight_layout()
-    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    # fig = plt.figure(11)
+    # ax = fig.add_subplot(111)
+    # ax.set_xlabel('Time (milliseconds)', fontsize = label_size)
+    # ax.set_ylabel('Total message load (KB)', fontsize = label_size)
+    # ax.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
+    # plt.bar(bins, msg_load, width, color="blue", linewidth=0.5)
+    # plt.locator_params(axis='x', nbins=5)
+    # plt.xticks(fontsize=label_size)
+    # plt.yticks(fontsize=label_size)
+    # title = prefix +'_Message_Load'
+    # # plt.title(title, fontsize = label_size)
+    # plt.tight_layout()
+    # plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
 
     fig = plt.figure(12)
     ax = fig.add_subplot(111)
-    ax.set_xlabel('Time (millisecond)', fontsize = label_size)
-    ax.set_ylabel('Average message load per rank (KB)', fontsize = label_size)
+    ax.set_xlabel('Time (milliseconds)', fontsize = label_size)
+    ax.set_ylabel('Msg load/rank (KB)', fontsize = label_size)
     ax.set_ylim([0, 20])
     ax.set_xlim([0, 0.2])
-    plt.plot(bins, avg_load, color="blue", linewidth=2)
-    ax.fill_between(bins, avg_load)
+    # ax.set_ylim([0, 35])
+    # ax.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
+    plt.plot(bins, avg_load, color="slategrey", linewidth=2)
+    ax.fill_between(bins, avg_load, color="slategrey")
     plt.xticks(fontsize=label_size)
     plt.yticks(fontsize=label_size)
+    plt.locator_params(axis='x', nbins=5)
     title = 'Total '+ format(total_msg, '.5f') +'( '+ format(np.max(avg_load), '.5f')+' KB/'+ str(bin_sz) +'ns)'
     # plt.title(title, fontsize = label_size)
     plt.tight_layout()
     plt.savefig('./'+prefix +'_Avg_Msg_Load.eps', format='eps', dpi=1000)
     
-    fig = plt.figure(13)
-    ax = fig.add_subplot(111)
-    ax.set_xlabel('Time (millisecond)', fontsize = label_size)
-    ax.set_ylabel('Peak message load per rank (KB)', fontsize = label_size)
-    # ax.set_ylim([0, 20])
-    ax.set_xlim([0, 0.2])
-    plt.plot(bins, max_load, color="blue", linewidth=2)
-    ax.fill_between(bins, max_load)
-    plt.xticks(fontsize=label_size)
-    plt.yticks(fontsize=label_size)
-    title = 'Total '+ format(total_msg, '.5f') +'( '+ format(np.max(max_load), '.5f')+' KB/'+ str(bin_sz) +'ns)'
-    # plt.title(title, fontsize = label_size)
-    plt.tight_layout()
-    plt.savefig('./'+prefix +'_Max_Msg_Load.eps', format='eps', dpi=1000)
-
+    
+    # fig = plt.figure(13)
+    # ax = fig.add_subplot(111)
+    # ax.set_xlabel('Time (milliseconds)', fontsize = label_size)
+    # ax.set_ylabel('Peak message load per rank (KB)', fontsize = label_size)
+    # # ax.set_ylim([0, 20])
+    # ax.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
+    # plt.plot(bins, max_load, color="slategrey", linewidth=2)
+    # ax.fill_between(bins, max_load, color="slategrey")
+    # plt.xticks(fontsize=label_size)
+    # plt.yticks(fontsize=label_size)
+    # title = 'Total '+ format(total_msg, '.5f') +'( '+ format(np.max(max_load), '.5f')+' KB/'+ str(bin_sz) +'ns)'
+    # # plt.title(title, fontsize = label_size)
+    # plt.tight_layout()
+    # plt.savefig('./'+prefix +'_Max_Msg_Load.eps', format='eps', dpi=1000)
+    
 
 
     plt.close(fig)
