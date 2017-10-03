@@ -12,8 +12,8 @@ if __name__ == "__main__":
     else:
         prefix = sys.argv[3]
     print prefix
-    if (app=='amg'):
-        amg = APP('amg', prefix, ['pink', 'purple'], hasSyn)
+    if (app.lower()=='amg'):
+        amg = APP('AMG', prefix, ['pink', 'purple'], hasSyn)
 
         amg.load_commtime_data('.')
         pmd.comm_time_plot(amg, 10)
@@ -36,8 +36,8 @@ if __name__ == "__main__":
 
         pmd.plt.close()
 
-    elif (app=='mg'):
-        mg = APP('mg',prefix, ['steelblue', 'black'], hasSyn)
+    elif (app.lower()=='mg'):
+        mg = APP('MG',prefix, ['steelblue', 'black'], hasSyn)
 
         mg.load_commtime_data('.')
         pmd.comm_time_plot(mg, 20)
@@ -60,8 +60,8 @@ if __name__ == "__main__":
 
         pmd.plt.close()
 
-    elif (app=='fb'):
-        mg = APP('fb',prefix, ['steelblue', 'black'], hasSyn)
+    elif (app.lower()=='fb'):
+        mg = APP('FB',prefix, ['steelblue', 'black'], hasSyn)
 
         mg.load_commtime_data('.')
         pmd.comm_time_plot(mg, 20)
@@ -84,8 +84,8 @@ if __name__ == "__main__":
 
         pmd.plt.close()
 
-    elif (app=='cr'):
-        cr = APP('cr',prefix, ['blue', 'black'], hasSyn)
+    elif (app.lower()=='cr'):
+        cr = APP('CR',prefix, ['blue', 'black'], hasSyn)
 
         cr.load_commtime_data('.')
         pmd.comm_time_plot(cr, 30)
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
         pmd.plt.close()
 
-    elif (app=='syn'):
+    elif (app.lower()=='syn'):
         syn = APP('syn',prefix, ['yellow', 'magenta'], hasSyn)
 
         syn.load_commtime_data('.')
