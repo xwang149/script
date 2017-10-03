@@ -14,7 +14,7 @@ def sep_app_msg_stats(app_name, path):
         wkld_msg_stats_file = os.path.join(lp_output_folder, 'dragonfly-msg-stats')
         app_mpi_replay_stats_file = os.path.join(lp_output_folder, app_name+'.csv')
         header = open(wkld_msg_stats_file, 'r').readline()
-        wkld_msg_stats = np.genfromtxt(wkld_msg_stats_file, delimiter=None, skip_header=1, names=['lpid', 'tid', 'datasize', 'time', 'packets', 'avghop','busytime'])
+        wkld_msg_stats = np.genfromtxt(wkld_msg_stats_file, delimiter=None, skip_header=1, names=['lpid', 'tid', 'datasize', 'avglatency', 'packets', 'avghop','busytime'])
 
         #the APP.csv file is got by "grep "APP 0/1/2" mpi-replay-stats > APP.csv "
         app_mpi_replay_stats = np.genfromtxt(app_mpi_replay_stats_file, delimiter=None, names=['app', 'appid','rank', 'rankid', 'lpid', 'nwid', 'nsends', 'nrecvs', 'nbsent', 'nbrecv','sendtime','communtime','computetime'])
