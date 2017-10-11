@@ -36,8 +36,9 @@ def comm_time_plot(app, subplot):
     #plt.yticks(fontsize = label_size)
     plt.yticks(fontsize = label_font)
     plt.xticks(fontsize = label_font, rotation=30)
+    ax2.set_yticklabels(ax2.get_yticks())
     #axes = plt.gca()
-    # ax2.set_ylim([0.16,0.40])
+    # ax2.set_ylim([165,170])
     ax2.set_ylabel("Milliseconds", fontsize=label_font)
     title = app.name+'-CommunicationTime'
     plt.title(title, fontsize = label_font)

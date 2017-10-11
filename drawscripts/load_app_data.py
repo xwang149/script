@@ -53,7 +53,7 @@ class APP(object):
             print subdir
             output_folder=os.path.join(path, subdir)
             load_file = os.path.join(output_folder, self.file_name)
-            DATA = np.genfromtxt(load_file, delimiter=None, names=['App', 'appid', 'RANK', 'rankid','lpid', 'nwid', 'nsend', 'nrecv', 'bytesend', 'byterecv','sendtime', 'commtime', 'comptime'])
+            DATA = np.genfromtxt(load_file, delimiter=None, names=['lpid', 'tid', 'nsend', 'nrecv', 'bytesend', 'byterecv','sendtime', 'commtime', 'comptime', 'jobid'])
             self.comm_time_data.append(DATA['commtime']/self.time_scale)
             #  print DATA['commtime'][0:10]
 
@@ -62,7 +62,7 @@ class APP(object):
         for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
             output_folder=os.path.join(path, subdir)
             load_file = os.path.join(output_folder, self.name+'-msg-stats.csv')
-            DATA = np.genfromtxt(load_file, delimiter=None, names=['lpid', 'tid', 'datasize', 'avgpacketlatency','packets', 'avghop', 'busytime'])
+            DATA = np.genfromtxt(load_file, delimiter=None, names=['lpid', 'tid', 'datasize', 'avglatency', 'packets', 'avghop','busytime', 'maxlatency', 'minlatency'])
             #  busytime = filter(None, DATA['busytime'])
             busytime = DATA['busytime']
             #  busytime.sort()
@@ -82,7 +82,7 @@ class APP(object):
             sum_hopbytes = sum(tlink_hopbytes)
             self.msg_hopbytes.append(sum_hopbytes)
             
-            latency = DATA['avgpacketlatency']
+            latency = DATA['avglatency']
             latency[:] = [x/self.time_scale for x in latency]
             self.msg_latency.append(latency)
 
@@ -104,17 +104,17 @@ class APP(object):
                 load_file = os.path.join(output_folder, self.name+'_router_stats.csv')
             
             channel_names=['lpid', 'groupid', 'routerid']
-            for i in range(0,96):
+            for i in range(0,34):
                 channel_names.append("lc"+str(i+1))
-            for i in range(0,10):
+            for i in range(0,4):
                 channel_names.append("gc"+str(i+1)) 
             # for i in range(0,4):
             #     channel_names.append("tc"+str(i+1))   
             DATA = np.genfromtxt(load_file, delimiter=None, names=channel_names)
             data = DATA.view(np.float64).reshape(len(DATA), -1)
 
-            sum_lch = data[:, 3:99].sum(axis=1)
-            max_lch = data[:, 3:99].max(axis=1)
+            sum_lch = data[:, 3:37].sum(axis=1)
+            max_lch = data[:, 3:37].max(axis=1)
             # sum_lch = filter(None, sum_lch)
             sum_lch = [x/self.time_scale for x in sum_lch]
             sorted_sum_lch = np.sort(sum_lch)
@@ -123,8 +123,8 @@ class APP(object):
             #  filtered_sorted_sum_lch=filter(None, sorted_sum_lch)
             # self.router_lch_stats.append(sorted_sum_lch)
 
-            sum_gch = data[:, 99:109].sum(axis=1)
-            max_gch = data[:, 99:109].max(axis=1)
+            sum_gch = data[:, 37:41].sum(axis=1)
+            max_gch = data[:, 37:41].max(axis=1)
             sum_gch[:] = [x/self.time_scale for x in sum_gch]
             sorted_sum_gch = np.sort(sum_gch)
 
@@ -138,9 +138,9 @@ class APP(object):
             self.router_lch_stats.append(sorted_sum_lch)
             self.router_gch_stats.append(sorted_sum_gch)
 
-            lch = list(data[:,3:99].flat)
+            lch = list(data[:,3:37].flat)
             lch = [x/self.time_scale for x in lch]
-            gch = list(data[:, 99:109].flat)
+            gch = list(data[:, 37:41].flat)
             gch = [x/self.time_scale for x in gch]
 
             # #padding with len(data)
@@ -161,7 +161,7 @@ class APP(object):
         # print len(self.router_tlink_stats), len(self.router_tlink_stats[0])
 
     def make_label(self, path='.'):
-        alloc_type=['rand_node', 'rand_grop', 'rand_rotr', 'rand_chassis','rand_cabinet','cont', 'hyb', 'randCab']
+        alloc_type=['rand_node', 'rand_grop', 'rand_rotr', 'rand_chas','rand_cab','cont', 'hyb', 'randCab']
         # alloc_type=['rand', 'cont', 'cons','hyb', 'perm']
         routing_type=['(min', 'adp', 'padp', 'nonm']
         app_name=['2pt', '6pt', 'z14pt']
@@ -185,8 +185,8 @@ class APP(object):
                             # tag += elem
                         final = word.replace("0","")
                         final = final.replace("rand_node","rand")
-                        final = final.replace("rand_cabinet","cab")
-                        final = final.replace("rand_chassis","chas")
+                        final = final.replace("rand_cab","cab")
+                        final = final.replace("rand_chas","chas")
                         tag += final
                         tag += '-'
                 # for elem in mapping_type:
@@ -219,9 +219,9 @@ class APP(object):
                 load_file = os.path.join(output_folder, self.name+'_router_traffic.csv')
             
             channel_names=['lpid', 'groupid', 'routerid']
-            for i in range(0,96):
+            for i in range(0,34):
                 channel_names.append("lc"+str(i+1))
-            for i in range(0,10):
+            for i in range(0,4):
                 channel_names.append("gc"+str(i+1)) 
             # for i in range(0,4):
             #     channel_names.append("tc"+str(i+1))
@@ -230,14 +230,14 @@ class APP(object):
             data = DATA.view(np.float64).reshape(len(DATA), -1)
 
             # data[:] = [0.0 for y in data for x in y if x > 9999999999]
-            for x in range(0,len(data)):
-                for y in range(0, len(data[x])):
-                    if (self.name=='amg' and data[x,y] > 999999):
-                        # print data[x,y]
-                        data[x,y] = 0.0
+            # for x in range(0,len(data)):
+            #     for y in range(0, len(data[x])):
+            #         if (self.name=='amg' and data[x,y] > 999999):
+            #             # print data[x,y]
+            #             data[x,y] = 0.0
 
 
-            sum_lch = data[:, 3:99].sum(axis=1)
+            sum_lch = data[:, 3:37].sum(axis=1)
             #  sum_lch = filter(None, sum_lch)
             sum_lch = [x/self.data_scale for x in sum_lch]
             sorted_sum_lch = np.sort(sum_lch)
@@ -245,14 +245,14 @@ class APP(object):
             filtered_sorted_sum_lch=filter(None, sorted_sum_lch)
             self.router_lch_traffic.append(filtered_sorted_sum_lch)
             # np.savetxt("router_lch_traffic.csv", filtered_sorted_sum_lch, delimiter=",")
-            sum_gch = data[:, 99:109].sum(axis=1)
+            sum_gch = data[:, 37:41].sum(axis=1)
             sum_gch[:] = [x/self.data_scale for x in sum_gch]
             sorted_sum_gch = np.sort( sum_gch )
             self.router_gch_traffic.append(sorted_sum_gch)
 
-            lch = list(data[:,3:99].flat)
+            lch = list(data[:,3:37].flat)
             lch = [x/self.time_scale for x in lch]
-            gch = list(data[:, 99:109].flat)
+            gch = list(data[:, 37:41].flat)
             gch = [x/self.time_scale for x in gch]
             # sorted_lch = np.sort(lch)
             # sorted_gch = np.sort(gch)
