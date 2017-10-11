@@ -25,7 +25,7 @@ class Dragonfly(object):
         self.alloc_file = self.alloc_file[:-1]
 
     def load_alloc(self):
-        if self.alloc_type == 'cont-cons':
+        if self.alloc_type == 'cont':
             print "this is dragonfly cont alloc"
             self.cont_alloc()
         elif self.alloc_type == 'rand_rotr':
@@ -52,10 +52,10 @@ class Dragonfly(object):
         elif self.alloc_type == 'op_rand':
             print "Dragonfly Over Provision Random Allocation!"
             self.overprovision_random_alloc()
-        elif self.alloc_type == 'rand_chassis':
+        elif self.alloc_type == 'rand_chas':
             print "Dragonfly "+ self.alloc_type + " Allocation!" 
             self.rand_chassis()
-        elif self.alloc_type == 'rand_cabinet':
+        elif self.alloc_type == 'rand_cab':
             print "Dragonfly "+ self.alloc_type + " Allocation!"
             self.rand_cabinet()
         elif self.alloc_type == 'cont-rand3d':
@@ -96,7 +96,8 @@ class Dragonfly(object):
                     for x in range(num_node_per_chassis):
                         alloc_list.append(node_id_start+x)
                 alloc_list = alloc_list[:rank]
-                for item in alloc_list:
+		sorted_list = sorted(alloc_list)
+                for item in sorted_list:
                     node_list.remove(item)
                     f.write("%s " % item)
                 f.write("\n")
@@ -137,7 +138,8 @@ class Dragonfly(object):
                         alloc_list.append(node_id_start+x)
                 alloc_list = alloc_list[:rank]
                 #  print alloc_list, '\n', len(alloc_list)
-                for item in alloc_list:
+		sorted_list = sorted(alloc_list)
+                for item in sorted_list:
                     node_list.remove(item)
                     f.write("%s " % item)
                 f.write("\n")
@@ -211,7 +213,8 @@ class Dragonfly(object):
                         alloc_list.append(node_id_start+x)
                 alloc_list = alloc_list[:rank]
                 #  print alloc_list, '\n', len(alloc_list)
-                for item in alloc_list:
+		sorted_list = sorted(alloc_list)
+                for item in sorted_list:
                     node_list.remove(item)
                     f.write("%s " % item)
                 f.write("\n")
@@ -251,7 +254,8 @@ class Dragonfly(object):
                         alloc_list.append(node_id_start+x)
                 alloc_list = alloc_list[:rank]
                 #  print alloc_list, '\n', len(alloc_list)
-                for item in alloc_list:
+		sorted_list = sorted(alloc_list)
+                for item in sorted_list:
                     node_list.remove(item)
                     f.write("%s " % item)
                 f.write("\n")
@@ -324,8 +328,9 @@ class Dragonfly(object):
                     alloc_list += node_list[idx:idx+chunk_size]
                     node_list = [elem for elem in node_list if (elem not in alloc_list)]
                 #  print alloc_list[0:rank]
+		sorted_list = sorted(alloc_list)
                 for idx in range(rank):
-                    f.write("%s " % alloc_list[idx])
+                    f.write("%s " % sorted_list[idx])
                 f.write("\n")
             f.closed
             self.alloc_file= tmp_filename
