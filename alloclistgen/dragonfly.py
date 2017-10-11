@@ -9,7 +9,7 @@ class Dragonfly(object):
         self.num_group = group
         #self.num_node_per_router = self.num_router_per_group/2
         self.num_node_per_router = 4
-	self.total_node = self.num_router_per_group*self.num_node_per_router*self.num_group
+        self.total_node = self.num_router_per_group*self.num_node_per_router*self.num_group
         self.total_router = self.num_router_per_group*self.num_group
         self.job_rank = job_rank
         self.alloc_type = alloc_type
@@ -64,14 +64,14 @@ class Dragonfly(object):
         elif self.alloc_type == 'randCab-rand3d':
             print "3d random permutation of random cabinet allocation"
             self.randCab_rand3d()
-	else:
+        else:
             print self.alloc_type +" Function Not Supported Yet!"
             exit()
 
 
     def rand_chassis(self):
         num_node_per_chassis = self.num_col*self.num_node_per_router
-	num_chassis = self.num_row*self.num_group
+        num_chassis = self.num_row*self.num_group
         if(self.syn==1):
             app_ranks = self.job_rank[:-1]
             bck_rank = self.job_rank[-1]
@@ -96,14 +96,14 @@ class Dragonfly(object):
                     for x in range(num_node_per_chassis):
                         alloc_list.append(node_id_start+x)
                 alloc_list = alloc_list[:rank]
-		sorted_list = sorted(alloc_list)
+                sorted_list = sorted(alloc_list)
                 for item in sorted_list:
                     node_list.remove(item)
                     f.write("%s " % item)
                 f.write("\n")
 
             if(self.syn==1):
-                syn_alloc_list = random.sample(node_list, bck_rank)
+                syn_alloc_list = sorted(random.sample(node_list, bck_rank))
                 for idx in range(len(syn_alloc_list)):
                     f.write("%s " % syn_alloc_list[idx])
                 f.write("\n")
@@ -138,14 +138,14 @@ class Dragonfly(object):
                         alloc_list.append(node_id_start+x)
                 alloc_list = alloc_list[:rank]
                 #  print alloc_list, '\n', len(alloc_list)
-		sorted_list = sorted(alloc_list)
+                sorted_list = sorted(alloc_list)
                 for item in sorted_list:
                     node_list.remove(item)
                     f.write("%s " % item)
                 f.write("\n")
 
             if(self.syn==1):
-                syn_alloc_list = random.sample(node_list, bck_rank)
+                syn_alloc_list = sorted(random.sample(node_list, bck_rank))
                 for idx in range(len(syn_alloc_list)):
                     f.write("%s " % syn_alloc_list[idx])
                 f.write("\n")
@@ -178,7 +178,7 @@ class Dragonfly(object):
                     f.write("\n")
                     start += num_rank
                 node_list = range(start, int(self.total_node))
-                syn_alloc_list = random.sample(node_list, self.job_rank[-1])
+                syn_alloc_list = sorted(random.sample(node_list, self.job_rank[-1]))
                 for idx in range(len(syn_alloc_list)):
                     f.write("%s " % syn_alloc_list[idx])
                 f.write("\n")
@@ -212,8 +212,8 @@ class Dragonfly(object):
                     for x in range(self.num_node_per_router):
                         alloc_list.append(node_id_start+x)
                 alloc_list = alloc_list[:rank]
-                #  print alloc_list, '\n', len(alloc_list)
-		sorted_list = sorted(alloc_list)
+                #  print alloc_list, '\n', len(alloc_list) 
+                sorted_list = sorted(alloc_list)
                 for item in sorted_list:
                     node_list.remove(item)
                     f.write("%s " % item)
@@ -221,8 +221,9 @@ class Dragonfly(object):
 
             if(self.syn==1):
                 syn_alloc_list = random.sample(node_list, bck_rank)
-                for idx in range(len(syn_alloc_list)):
-                    f.write("%s " % syn_alloc_list[idx])
+                sorted_syn_alloc_list = sorted(syn_alloc_list)
+                for idx in range(len(sorted_syn_alloc_list)):
+                    f.write("%s " % sorted_syn_alloc_list[idx])
                 f.write("\n")                
 
             f.closed
@@ -254,7 +255,7 @@ class Dragonfly(object):
                         alloc_list.append(node_id_start+x)
                 alloc_list = alloc_list[:rank]
                 #  print alloc_list, '\n', len(alloc_list)
-		sorted_list = sorted(alloc_list)
+                sorted_list = sorted(alloc_list)
                 for item in sorted_list:
                     node_list.remove(item)
                     f.write("%s " % item)
@@ -328,7 +329,7 @@ class Dragonfly(object):
                     alloc_list += node_list[idx:idx+chunk_size]
                     node_list = [elem for elem in node_list if (elem not in alloc_list)]
                 #  print alloc_list[0:rank]
-		sorted_list = sorted(alloc_list)
+                sorted_list = sorted(alloc_list)
                 for idx in range(rank):
                     f.write("%s " % sorted_list[idx])
                 f.write("\n")
