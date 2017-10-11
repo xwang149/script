@@ -46,28 +46,30 @@ def sep_app_router_from_wkld(app_name, path, output_info='stats'):
         lp_output_folder = os.path.join(path, subdir)
         wkld_router_file = os.path.join(lp_output_folder, 'dragonfly-router-'+output_info)
         #  print wkld_router_file
-        header = open(wkld_router_file, 'r').readline()
+        # header = open(wkld_router_file, 'r').readline()
         channel_names=['lpid', 'groupid', 'routerid']
-        for i in range(0,96):
+        for i in range(0,34):
             channel_names.append("lc"+str(i+1))
-        for i in range(0,10):
+        for i in range(0,4):
             channel_names.append("gc"+str(i+1)) 
         # for i in range(0,4):
         #     channel_names.append("tc"+str(i+1))        
-        all_router_data = np.genfromtxt(wkld_router_file, delimiter=None, skip_header=1, names=channel_names)
-
+        if(output_info=='stats'):
+            all_router_data = np.genfromtxt(wkld_router_file, delimiter=None, skip_header=1, names=channel_names)
+        else:
+            all_router_data = np.genfromtxt(wkld_router_file, delimiter=None, skip_header=0, names=channel_names)
         app_mpi_replay_stats_file = os.path.join(lp_output_folder, app_name+'.csv')
         #  print app_mpi_replay_stats_file
-        app_mpi_replay_stats = np.genfromtxt(app_mpi_replay_stats_file, delimiter=None, names=['app', 'appid','rank', 'rankid', 'lpid', 'nwid', 'nsends', 'nrecvs', 'nbsent', 'nbrecv','sendtime','communtime','computetime'])
+        app_mpi_replay_stats = np.genfromtxt(app_mpi_replay_stats_file, delimiter=None, names=['lpid', 'tid', 'nsend', 'nrecv', 'bytesend', 'byterecv','sendtime', 'commtime', 'comptime', 'jobid'])
 
         allrouter = all_router_data.view(np.float64).reshape(len(all_router_data), -1)
         app = app_mpi_replay_stats.view(np.float64).reshape(len(app_mpi_replay_stats), -1)
-        app_nwid = app[:,5]
+        app_nwid = app[:,1]
         app_router_info = identify_router_of_app(app_nwid, allrouter)
 
         app_router_info_file = os.path.join(lp_output_folder, app_name+"_router_"+output_info+".csv")
         with open(app_router_info_file, 'w') as outputfile:
-            outputfile.write(header)
+            #outputfile.write(header)
             np.savetxt(outputfile, app_router_info, delimiter=" ")
 
 
@@ -75,12 +77,12 @@ if __name__ == "__main__":
     app = sys.argv[1]
     hasSyn = sys.argv[2]
     subprocess.call(shlex.split("./getappfromwkld.sh "+app+" "+hasSyn))
-    sep_app_router_from_wkld(app, '.', 'traffic')
+    # sep_app_router_from_wkld(app, '.', 'traffic')
     sep_app_router_from_wkld(app, '.', 'stats')
     # sep_app_router_from_wkld('MG', '.', 'traffic')
     # sep_app_router_from_wkld('MG', '.', 'stats')
     # sep_app_router_from_wkld('CR', '.', 'traffic')
     # sep_app_router_from_wkld('CR', '.', 'stats')
     if(hasSyn==1):
-        sep_app_router_from_wkld('syn', '.', 'traffic')
+        # sep_app_router_from_wkld('syn', '.', 'traffic')
         sep_app_router_from_wkld('syn', '.', 'stats')

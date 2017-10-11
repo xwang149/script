@@ -42,11 +42,11 @@ def readMPI(file_name):
         if "ID" in line:
             src_rank = int(parts[7])
             dst_rank = int(parts[9])
-            msg_size = float(parts[13])/1024.0/1024.0 
+            msg_size = float(parts[13])/1024.0/1024.0         #MB
         else:
             src_rank = int(parts[6])
             dst_rank = int(parts[8])
-            msg_size = float(parts[12])/1024.0/1024.0            
+            msg_size = float(parts[12])/1024.0/1024.0         #MB
         time = float(parts[0][1:-1])
         mpi_op["src"].append(src_rank)
         mpi_op["dst"].append(dst_rank)
@@ -103,7 +103,6 @@ def drawHeatmap(rank, prefix, z):
 
 def drawMsgmap(prefix, mpi_op, time_interval, end_time):
     #plot msg load
-    # bin_sz = (mpi_op["time"][-1] - mpi_op["time"][0]+1)/NUM_BINS
     bin_sz = time_interval
     num_bins = int(math.ceil(end_time/time_interval))
     # print num_bins
@@ -113,7 +112,6 @@ def drawMsgmap(prefix, mpi_op, time_interval, end_time):
     max_load = [0.0 for x in range(0,num_bins)]
     # print bins
     index = 0
-    # start = mpi_op["time"][0]
     start = 0
     for i in xrange(0, num_bins):
         count = 0
@@ -162,9 +160,8 @@ def drawMsgmap(prefix, mpi_op, time_interval, end_time):
     ax = fig.add_subplot(111)
     ax.set_xlabel('Time (milliseconds)', fontsize = label_size)
     ax.set_ylabel('Msg load/rank (KB)', fontsize = label_size)
-    ax.set_ylim([0, 20])
-    ax.set_xlim([0, 0.2])
-    # ax.set_ylim([0, 35])
+    ax.set_xlim([0,66])
+    ax.set_ylim([0, 8])
     # ax.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
     plt.plot(bins, avg_load, color="slategrey", linewidth=2)
     ax.fill_between(bins, avg_load, color="slategrey")
@@ -172,7 +169,7 @@ def drawMsgmap(prefix, mpi_op, time_interval, end_time):
     plt.yticks(fontsize=label_size)
     plt.locator_params(axis='x', nbins=5)
     title = 'Total '+ format(total_msg, '.5f') +'( '+ format(np.max(avg_load), '.5f')+' KB/'+ str(bin_sz) +'ns)'
-    # plt.title(title, fontsize = label_size)
+    plt.title(prefix, fontsize = label_size)
     plt.tight_layout()
     plt.savefig('./'+prefix +'_Avg_Msg_Load.eps', format='eps', dpi=1000)
     
@@ -192,11 +189,120 @@ def drawMsgmap(prefix, mpi_op, time_interval, end_time):
     # plt.tight_layout()
     # plt.savefig('./'+prefix +'_Max_Msg_Load.eps', format='eps', dpi=1000)
     
-
-
     plt.close(fig)
 
-    return sorted(range(len(msg_load)), key=lambda i: msg_load[i])[-10:]
+def drawCrossLoad(prefix, mpi_op, time_interval, end_time, PART, fig_num):
+    #plot msg load
+    if PART == 'group':
+        part_size = 16 * 6 * 4
+    elif PART == 'cabinet':
+        part_size = 16 * 3 * 4
+    elif PART == 'chassis':
+        part_size = 16 * 4
+    elif PART == 'router':
+        part_size = 4
+    else:
+        raise ValueError("Non-supported PART!")
+
+    bin_sz = time_interval
+    num_bins = int(math.ceil(end_time/time_interval))
+    # print num_bins
+    bins = [x*time_interval/1000.0/1000.0 for x in range(0,num_bins)] #millisec
+    cross_msg_load = [0.0 for x in range(0,num_bins)]
+    cross_avg_load = [0.0 for x in range(0,num_bins)]
+
+    within_msg_load = [0.0 for x in range(0,num_bins)]
+    within_avg_load = [0.0 for x in range(0,num_bins)]
+
+    # print bins
+    index = 0
+    start = 0
+    for i in xrange(0, num_bins):
+        within_count = 0
+        cross_count = 0
+        end = start + bin_sz*(i+1)
+
+        while (index < len(mpi_op["time"]) and mpi_op["time"][index] <= end ):
+            src_part = mpi_op["src"][index]/part_size
+            dst_part = mpi_op["dst"][index]/part_size
+            if (src_part == dst_part):
+                within_msg_load[i] += mpi_op["msg_sz"][index]
+                within_count += 1
+            else:
+                cross_msg_load[i] += mpi_op["msg_sz"][index]
+                cross_count += 1
+            index += 1
+
+        if within_count > 0:  
+            within_avg_load[i] = (within_msg_load[i]*1024.0/within_count)
+        if cross_count > 0:
+            cross_avg_load[i] = (cross_msg_load[i]*1024.0/cross_count)
+
+    fig = plt.figure(fig_num)
+    ax1 = fig.add_subplot(111)
+    ax1.set_xlabel('Time (milliseconds)', fontsize = label_size)
+    ax1.set_ylabel('Msg Load/Rank (KB)', fontsize = label_size)
+    ax1.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
+    plt.plot(bins, within_avg_load, color="slategrey", linewidth=2)
+    ax1.fill_between(bins, within_avg_load, color="slategrey")
+    plt.xticks(fontsize=label_size)
+    plt.yticks(fontsize=label_size)
+    plt.locator_params(axis='x', nbins=5)
+    title = prefix +'_within_'+PART+'_avg_load'
+    plt.title(title, fontsize = label_size)
+    plt.tight_layout()
+    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.close(fig)
+
+    fig = plt.figure(fig_num+1)
+    ax1 = fig.add_subplot(111)
+    ax1.set_xlabel('Time (milliseconds)', fontsize = label_size)
+    ax1.set_ylabel('Msg Load/Rank(KB)', fontsize = label_size)
+    ax1.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
+    plt.plot(bins, cross_avg_load, color="slategrey", linewidth=2)
+    ax1.fill_between(bins, cross_avg_load, color="slategrey")
+    plt.xticks(fontsize=label_size)
+    plt.yticks(fontsize=label_size)
+    plt.locator_params(axis='x', nbins=5)
+    title = prefix +'_cross_'+PART+'_avg_load'
+    plt.title(title, fontsize = label_size)
+    plt.tight_layout()
+    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.close(fig)
+
+
+    fig = plt.figure(fig_num+2)
+    ax1 = fig.add_subplot(111)
+    ax1.set_xlabel('Time (milliseconds)', fontsize = label_size)
+    ax1.set_ylabel('Msg Load (MB)', fontsize = label_size)
+    ax1.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
+    plt.plot(bins, within_msg_load, color="slategrey", linewidth=2)
+    ax1.fill_between(bins, within_msg_load, color="slategrey")
+    plt.xticks(fontsize=label_size)
+    plt.yticks(fontsize=label_size)
+    plt.locator_params(axis='x', nbins=5)
+    title = prefix +'_within_'+PART+'_msg_load'
+    plt.title(title, fontsize = label_size)
+    plt.tight_layout()
+    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.close(fig)
+
+    fig = plt.figure(fig_num+3)
+    ax1 = fig.add_subplot(111)
+    ax1.set_xlabel('Time (milliseconds)', fontsize = label_size)
+    ax1.set_ylabel('Msg Load(MB)', fontsize = label_size)
+    ax1.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
+    plt.plot(bins, cross_msg_load, color="slategrey", linewidth=2)
+    ax1.fill_between(bins, cross_msg_load, color="slategrey")
+    plt.xticks(fontsize=label_size)
+    plt.yticks(fontsize=label_size)
+    plt.locator_params(axis='x', nbins=5)
+    title = prefix +'_cross_'+PART+'_msg_load'
+    plt.title(title, fontsize = label_size)
+    plt.tight_layout()
+    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    plt.close(fig)
+
 
 def plotRtrStat(prefix, rtr_stat, subplot, ylimit):
     lch_stat=[]
@@ -339,7 +445,7 @@ if __name__ == "__main__":
         time_interval = long(sys.argv[4])
     print prefix, rank
 
-    limit=[]
+    # limit=[]
     # rtr_stat = readSample(file_name+'_cont')
     # lch_max, gch_max, ter_max = plotRtrStat(prefix+'_cont', rtr_stat, 20, None)
     # limit.append(lch_max)
@@ -363,9 +469,12 @@ if __name__ == "__main__":
     if not time_interval:
         time_interval = int(math.ceil(end_time/NUM_BINS))
     # print time_interval
-    drawHeatmap(rank, prefix, z)
-    max_indexes = drawMsgmap(prefix, mpi_op, time_interval, end_time)
-
+    # drawHeatmap(rank, prefix, z)
+    drawMsgmap(prefix, mpi_op, time_interval, end_time)
+    # drawCrossLoad(prefix, mpi_op, time_interval, end_time, 'cabinet', 21)
+    # drawCrossLoad(prefix, mpi_op, time_interval, end_time, 'chassis', 31)
+    # drawCrossLoad(prefix, mpi_op, time_interval, end_time, 'router', 41)
+    # drawCrossLoad(prefix, mpi_op, time_interval, end_time, 'group', 51)
 
 
 

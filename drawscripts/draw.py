@@ -12,8 +12,8 @@ if __name__ == "__main__":
     else:
         prefix = sys.argv[3]
     print prefix
-    if (app=='amg'):
-        amg = APP('amg', prefix, ['pink', 'purple'], hasSyn)
+    if (app.lower()=='amg'):
+        amg = APP('AMG', prefix, ['pink', 'purple'], hasSyn)
 
         amg.load_commtime_data('.')
         pmd.comm_time_plot(amg, 10)
@@ -28,16 +28,16 @@ if __name__ == "__main__":
         pmd.router_lch_stats_plot(amg, 14)
         pmd.router_gch_stats_plot(amg, 15)
 
-        amg.load_router_traffic_data()
-        pmd.router_gch_traffic_plot(amg, 16)
-        pmd.router_lch_traffic_plot(amg, 17)
-        pmd.router_lch_load_plot(amg,18)
-        pmd.router_gch_load_plot(amg,19)
+        # amg.load_router_traffic_data()
+        # pmd.router_gch_traffic_plot(amg, 16)
+        # pmd.router_lch_traffic_plot(amg, 17)
+        # pmd.router_lch_load_plot(amg,18)
+        # pmd.router_gch_load_plot(amg,19)
 
         pmd.plt.close()
 
-    elif (app=='mg'):
-        mg = APP('mg',prefix, ['steelblue', 'black'], hasSyn)
+    elif (app.lower()=='mg'):
+        mg = APP('MG',prefix, ['steelblue', 'black'], hasSyn)
 
         mg.load_commtime_data('.')
         pmd.comm_time_plot(mg, 20)
@@ -52,16 +52,16 @@ if __name__ == "__main__":
         pmd.router_lch_stats_plot(mg, 24)
         pmd.router_gch_stats_plot(mg, 25)
 
-        mg.load_router_traffic_data()
-        pmd.router_gch_traffic_plot(mg, 26)
-        pmd.router_lch_traffic_plot(mg, 27)
-        pmd.router_lch_load_plot(mg,28)
-        pmd.router_gch_load_plot(mg,29)
+        # mg.load_router_traffic_data()
+        # pmd.router_gch_traffic_plot(mg, 26)
+        # pmd.router_lch_traffic_plot(mg, 27)
+        # pmd.router_lch_load_plot(mg,28)
+        # pmd.router_gch_load_plot(mg,29)
 
         pmd.plt.close()
 
-    elif (app=='fb'):
-        mg = APP('fb',prefix, ['steelblue', 'black'], hasSyn)
+    elif (app.lower()=='fb'):
+        mg = APP('FB',prefix, ['steelblue', 'black'], hasSyn)
 
         mg.load_commtime_data('.')
         pmd.comm_time_plot(mg, 20)
@@ -76,16 +76,16 @@ if __name__ == "__main__":
         pmd.router_lch_stats_plot(mg, 24)
         pmd.router_gch_stats_plot(mg, 25)
 
-        mg.load_router_traffic_data()
-        pmd.router_gch_traffic_plot(mg, 26)
-        pmd.router_lch_traffic_plot(mg, 27)
-        pmd.router_lch_load_plot(mg,28)
-        pmd.router_gch_load_plot(mg,29)
+        # mg.load_router_traffic_data()
+        # pmd.router_gch_traffic_plot(mg, 26)
+        # pmd.router_lch_traffic_plot(mg, 27)
+        # pmd.router_lch_load_plot(mg,28)
+        # pmd.router_gch_load_plot(mg,29)
 
         pmd.plt.close()
 
-    elif (app=='cr'):
-        cr = APP('cr',prefix, ['blue', 'black'], hasSyn)
+    elif (app.lower()=='cr'):
+        cr = APP('CR',prefix, ['blue', 'black'], hasSyn)
 
         cr.load_commtime_data('.')
         pmd.comm_time_plot(cr, 30)
@@ -100,15 +100,15 @@ if __name__ == "__main__":
         pmd.router_lch_stats_plot(cr, 34)
         pmd.router_gch_stats_plot(cr, 35)
 
-        cr.load_router_traffic_data()
-        pmd.router_gch_traffic_plot(cr, 36)
-        pmd.router_lch_traffic_plot(cr, 37)
-        pmd.router_lch_load_plot(cr,38)
-        pmd.router_gch_load_plot(cr,39)
+        # cr.load_router_traffic_data()
+        # pmd.router_gch_traffic_plot(cr, 36)
+        # pmd.router_lch_traffic_plot(cr, 37)
+        # pmd.router_lch_load_plot(cr,38)
+        # pmd.router_gch_load_plot(cr,39)
 
         pmd.plt.close()
 
-    elif (app=='syn'):
+    elif (app.lower()=='syn'):
         syn = APP('syn',prefix, ['yellow', 'magenta'], hasSyn)
 
         syn.load_commtime_data('.')
@@ -124,11 +124,11 @@ if __name__ == "__main__":
         pmd.router_lch_stats_plot(syn, 54)
         pmd.router_gch_stats_plot(syn, 55)
 
-        syn.load_router_traffic_data()
-        pmd.router_gch_traffic_plot(syn, 56)
-        pmd.router_lch_traffic_plot(syn, 57)
-        pmd.router_lch_load_plot(syn,58)
-        pmd.router_gch_load_plot(syn,59)
+        # syn.load_router_traffic_data()
+        # pmd.router_gch_traffic_plot(syn, 56)
+        # pmd.router_lch_traffic_plot(syn, 57)
+        # pmd.router_lch_load_plot(syn,58)
+        # pmd.router_gch_load_plot(syn,59)
 
         pmd.plt.close()
 
@@ -148,11 +148,11 @@ if __name__ == "__main__":
         pmd.router_lch_stats_plot(oth, 44)
         pmd.router_gch_stats_plot(oth, 45)
 
-        oth.load_router_traffic_data()
-        pmd.router_gch_traffic_plot(oth, 46)
-        pmd.router_lch_traffic_plot(oth, 47)
-        pmd.router_lch_load_plot(oth,48)
-        pmd.router_gch_load_plot(oth,49)
+        # oth.load_router_traffic_data()
+        # pmd.router_gch_traffic_plot(oth, 46)
+        # pmd.router_lch_traffic_plot(oth, 47)
+        # pmd.router_lch_load_plot(oth,48)
+        # pmd.router_gch_load_plot(oth,49)
 
         pmd.plt.close()
     # pmd.plt.show()

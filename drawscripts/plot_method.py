@@ -10,8 +10,8 @@ from load_wrkld_data import WorkLoad
 
 line_width = 3
 label_font = 25
-line_style = [ ['green', '--'],  ['blue', '--'], ['green', '-'], ['blue','-'] ]       #place and route
-# line_style = [ ['green', '-'], ['red', '-'], ['purple', '-'], ['blue', '-'] ]            #adp
+# line_style = [ ['green', '--'],  ['blue', '--'], ['green', '-'], ['blue','-'] ]       #place and route
+line_style = [ ['green', '-'], ['red', '-'], ['purple', '-'], ['blue', '-'] ]            #adp
 # line_style = [ ['green', '--'], ['red', '--'], ['purple', '--'], ['blue','--'] ]      #min
 # line_style = [ ['green', '--'], ['blue', '--'], ['red', '--'], ['green','-'], ['blue','-'], ['red','-']]
 
@@ -36,11 +36,12 @@ def comm_time_plot(app, subplot):
     #plt.yticks(fontsize = label_size)
     plt.yticks(fontsize = label_font)
     plt.xticks(fontsize = label_font, rotation=30)
+    ax2.set_yticklabels(ax2.get_yticks())
     #axes = plt.gca()
-    # ax2.set_ylim([0.16,0.40])
+    # ax2.set_ylim([165,170])
     ax2.set_ylabel("Milliseconds", fontsize=label_font)
-    title = app.name+'_CommunicationTime'
-    # plt.title(title, fontsize = label_size)
+    title = app.name+'-CommunicationTime'
+    plt.title(title, fontsize = label_font)
     plt.tight_layout()
     plt.savefig('./'+app.prefix+title+'.eps', format='eps', dpi=1000)
     # plt.savefig("./" +title+ ".pdf", format='pdf', dpi=1000)
@@ -62,13 +63,20 @@ def msg_busytime_plot(APP, subplot):
 
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
-    # axes.set_xlim(left=0)
-    #axes.set_ylim([0,10])
     plt.xticks(fontsize = label_font)
     plt.yticks(fontsize = label_font)
     plt.locator_params(axis='x', nbins=5)
     plt.xlabel('Saturated Time(Milliseconds)', fontsize = label_font)
     plt.ylabel('Percentage of Ranks', fontsize = label_font)
+    # axes.set_xlim(left=0)
+    # Hide the right and top spines
+    axes.spines['right'].set_visible(False)
+    axes.spines['top'].set_visible(False)
+    # Only show ticks on the left and bottom spines
+    axes.yaxis.set_ticks_position('left')
+    axes.xaxis.set_ticks_position('bottom')
+    plt.grid(color='grey')
+
     title = APP.name + '_TerminalLinkSaturatedTime'
     # plt.title(title, fontsize = label_font)
     plt.legend(loc = 'lower right', fontsize=20)
@@ -92,13 +100,20 @@ def msg_avghop_plot(APP, subplot):
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
     axes.set_xlim(left=0)
-    #axes.set_ylim([0,10])
+    # Hide the right and top spines
+    axes.spines['right'].set_visible(False)
+    axes.spines['top'].set_visible(False)
+    # Only show ticks on the left and bottom spines
+    axes.yaxis.set_ticks_position('left')
+    axes.xaxis.set_ticks_position('bottom')
+    plt.grid(color='grey')
+
     plt.xticks(fontsize = label_font)
     plt.yticks(fontsize = label_font)
     plt.xlabel('Msg Avg Hops', fontsize = label_font)
     plt.ylabel('Percentage of Ranks', fontsize = label_font)
-    title = APP.name + '_RankAvgHop'
-    # plt.title(title, fontsize = label_font)
+    title = APP.name + '-RankAvgHop'
+    plt.title(title, fontsize = label_font)
     plt.legend(loc = 'best', fontsize=20)
     plt.tight_layout()
     plt.savefig('./'+APP.prefix + title+'.eps', format='eps', dpi=1000)
@@ -121,7 +136,14 @@ def tlink_traffic_plot(APP, subplot):
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
     axes.set_xlim(left=0)
-    #axes.set_ylim([0,10])
+    # Hide the right and top spines
+    axes.spines['right'].set_visible(False)
+    axes.spines['top'].set_visible(False)
+    # Only show ticks on the left and bottom spines
+    axes.yaxis.set_ticks_position('left')
+    axes.xaxis.set_ticks_position('bottom')
+    plt.grid(color='grey')
+
     plt.xticks(fontsize = label_font)
     plt.yticks(fontsize = label_font)
     plt.locator_params(axis='x', nbins=5)
@@ -152,7 +174,14 @@ def msg_latency_plot(APP, subplot):
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
     axes.set_xlim(left=0)
-    #axes.set_ylim([0,10])
+    # Hide the right and top spines
+    axes.spines['right'].set_visible(False)
+    axes.spines['top'].set_visible(False)
+    # Only show ticks on the left and bottom spines
+    axes.yaxis.set_ticks_position('left')
+    axes.xaxis.set_ticks_position('bottom')
+    plt.grid(color='grey')
+
     plt.xticks(fontsize = label_font)
     plt.yticks(fontsize = label_font)
     plt.xlabel('Msg Latency (Milliseconds)', fontsize = label_font)
@@ -183,15 +212,22 @@ def router_lch_stats_plot(app, subplot):
     axes = plt.gca()
     # axes.set_xlim(left=0)
     # plt.ylim(90, 100)
-    # axes.set_ylim([0,25])
+    # Hide the right and top spines
+    axes.spines['right'].set_visible(False)
+    axes.spines['top'].set_visible(False)
+    # Only show ticks on the left and bottom spines
+    axes.yaxis.set_ticks_position('left')
+    axes.xaxis.set_ticks_position('bottom')
+    plt.grid(color='grey')
+
     plt.locator_params(axis='x', nbins=5)
     plt.xlabel('Saturated time (Milliseconds)', fontsize=label_font)
     plt.ylabel('Percentage of Routers', fontsize=label_font)
     if app.name in 'syn':
-        title = 'total_LchannelSaturatedTime'
+        title = 'total-LchannelSaturatedTime'
     else:
-        title = app.name + '_LchannelSaturatedTime'
-    # plt.title(title,  fontsize=label_font)
+        title = app.name + '-LchannelSaturatedTime'
+    plt.title(title,  fontsize=label_font)
     plt.legend(loc = 'lower right', fontsize=20)
     plt.tight_layout()
     plt.savefig('./'+app.prefix + title+'.eps', format='eps', dpi=1000)
@@ -267,14 +303,21 @@ def router_gch_stats_plot(app, subplot):
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
     axes.set_xlim(left=0)
-    #axes.set_ylim([0,160])
+    # Hide the right and top spines
+    axes.spines['right'].set_visible(False)
+    axes.spines['top'].set_visible(False)
+    # Only show ticks on the left and bottom spines
+    axes.yaxis.set_ticks_position('left')
+    axes.xaxis.set_ticks_position('bottom')
+    plt.grid(color='grey')
+
     plt.xlabel('Saturated time (Milliseconds)', fontsize=label_font)
     plt.ylabel('Percentage of Routers', fontsize=label_font)
     if app.name in 'syn':
         title = 'total-GchannelSaturatedTime'
     else:
         title = app.name + '-GchannelSaturatedTime'
-    # plt.title(title , fontsize=label_font)
+    plt.title(title , fontsize=label_font)
     plt.locator_params(axis='x', nbins=5)
     plt.legend(loc = 'lower right', fontsize=20)
     plt.tight_layout()
@@ -358,6 +401,14 @@ def router_gch_load_plot(app, subplot):
     plt.locator_params(axis='x', nbins=5)
     axes = plt.gca()
     axes.set_xlim(left=0)
+    # Hide the right and top spines
+    axes.spines['right'].set_visible(False)
+    axes.spines['top'].set_visible(False)
+    # Only show ticks on the left and bottom spines
+    axes.yaxis.set_ticks_position('left')
+    axes.xaxis.set_ticks_position('bottom')
+    plt.grid(color='grey')
+
     plt.xlabel('Traffic Amount (MB)', fontsize=label_font)
     plt.ylabel('Percentage of global channels', fontsize=label_font)
     if app.name in 'syn':
@@ -396,6 +447,14 @@ def router_lch_load_plot(app, subplot):
     plt.locator_params(axis='x', nbins=5)
     axes = plt.gca()
     axes.set_xlim(left=0)
+    # Hide the right and top spines
+    axes.spines['right'].set_visible(False)
+    axes.spines['top'].set_visible(False)
+    # Only show ticks on the left and bottom spines
+    axes.yaxis.set_ticks_position('left')
+    axes.xaxis.set_ticks_position('bottom')
+    plt.grid(color='grey')
+
     plt.xlabel('Traffic Amount (MB)', fontsize=label_font)
     plt.ylabel('Percentage of local channels', fontsize=label_font)
     if app.name in 'syn':
