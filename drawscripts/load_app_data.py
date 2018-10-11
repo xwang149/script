@@ -4,6 +4,10 @@ import subprocess
 import shlex
 import numpy as np
 import os
+from string import digits
+
+sort_order1 = {'cont':0 ,'rand_cab':1, 'rand_chas':2, 'rand_rotr':3, 'rand_node':4}
+sort_order2 = {'min':0, 'adp':1, 'padp':2}
 
 class APP(object):
     def __init__(self, name, prefix, color, syn,\
@@ -49,7 +53,7 @@ class APP(object):
     def load_commtime_data(self, path='.'):
         subprocess.call(shlex.split("./getappfromwkld.sh "+self.name+" "+str(self.hasSyn)))
         print 'comm time: '
-        for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
+        for subdir in sorted(next(os.walk(path))[1], key=lambda x: (int(x.split("-")[4][1:]), sort_order2[x.split("-")[1]] ,sort_order1[x.split("-")[0].translate(None, digits)])):
             print subdir
             output_folder=os.path.join(path, subdir)
             load_file = os.path.join(output_folder, self.file_name)
@@ -59,7 +63,7 @@ class APP(object):
 
     def load_msg_data(self, path='.'):
         subprocess.call(shlex.split("./sep_app_from_wkld.py "+self.name+" "+str(self.hasSyn)))
-        for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
+        for subdir in sorted(next(os.walk(path))[1], key=lambda x: (int(x.split("-")[4][1:]),  sort_order2[x.split("-")[1]] ,sort_order1[x.split("-")[0].translate(None, digits)])):
             output_folder=os.path.join(path, subdir)
             load_file = os.path.join(output_folder, self.name+'-msg-stats.csv')
             DATA = np.genfromtxt(load_file, delimiter=None, names=['lpid', 'tid', 'datasize', 'avglatency', 'packets', 'avghop','busytime', 'maxlatency', 'minlatency'])
@@ -95,7 +99,7 @@ class APP(object):
     def load_router_stats_data(self, path='.'):
         subprocess.call(shlex.split("./sep_app_router_info.py "+self.name+" "+str(self.hasSyn)))
         print 'router stats:'
-        for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
+        for subdir in sorted(next(os.walk(path))[1], key=lambda x: (int(x.split("-")[4][1:]),  sort_order2[x.split("-")[1]] ,sort_order1[x.split("-")[0].translate(None, digits)])):
             print subdir
             output_folder=os.path.join(path, subdir)
             if self.name in 'syn':
@@ -161,19 +165,19 @@ class APP(object):
         # print len(self.router_tlink_stats), len(self.router_tlink_stats[0])
 
     def make_label(self, path='.'):
-        alloc_type=['rand_node', 'rand_grop', 'rand_rotr', 'rand_chas','rand_cab','cont', 'hyb', 'randCab']
+        alloc_type=['rand_node', 'rand_grop', 'rand_rotr', 'rand_chas','rand_cab','cont', 'hyb']
         # alloc_type=['rand', 'cont', 'cons','hyb', 'perm']
-        routing_type=['(min', 'adp', 'padp', 'nonm']
+        routing_type=['min', 'adp', 'padp', 'nonm']
         app_name=['2pt', '6pt', 'z14pt']
         # routing_type=[]
         # mapping_type=['cons', 'perm', 'rand3d']
         print 'labels: '
-        for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
+        for subdir in sorted(next(os.walk(path))[1], key=lambda x: (int(x.split("-")[4][1:]),  sort_order2[x.split("-")[1]] ,sort_order1[x.split("-")[0].translate(None, digits)])):
             print subdir
             word_array=subdir.split('-')
             tag = ''
             name=''
-            payload_size = '-msg'
+            payload_size = '-bck'
             for word in word_array:
                 if('l' in word):
                     payload_size += word[1:]
@@ -183,10 +187,11 @@ class APP(object):
                             # tag += word
                         # else:
                             # tag += elem
-                        final = word.replace("0","")
+                        final = word.translate(None, digits)
                         final = final.replace("rand_node","rand")
                         final = final.replace("rand_cab","cab")
                         final = final.replace("rand_chas","chas")
+                        final = final.replace("rand_rotr","rotr")
                         tag += final
                         tag += '-'
                 # for elem in mapping_type:
@@ -210,7 +215,7 @@ class APP(object):
         subprocess.call(shlex.split("./sep_app_router_info.py "+self.name+" "+str(self.hasSyn)))
         index = 0
         print 'traffic: '
-        for subdir in sorted(next(os.walk(path))[1], key = lambda x: ( int(x[x.find("-l")+2:x.find("-i")]), x[0:x.find("-"+self.name)] )):
+        for subdir in sorted(next(os.walk(path))[1], key=lambda x: (int(x.split("-")[4][1:]),  sort_order2[x.split("-")[1]] ,sort_order1[x.split("-")[0].translate(None, digits)])):
             print subdir
             output_folder=os.path.join(path, subdir)
             if self.name in 'syn':
@@ -235,7 +240,6 @@ class APP(object):
             #         if (self.name=='amg' and data[x,y] > 999999):
             #             # print data[x,y]
             #             data[x,y] = 0.0
-
 
             sum_lch = data[:, 3:37].sum(axis=1)
             #  sum_lch = filter(None, sum_lch)

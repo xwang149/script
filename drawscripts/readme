@@ -1,0 +1,8 @@
+Put the output directories of CODES simulation into this folder, Then run
+
+./draw.py [app_name] [has_bckgrd] [prefix_of_output_figures]
+
+eg.
+./draw.py amg 0 1app-l0-
+./draw.py mg 0 1app-l0-
+./draw.py cr 0 1app-l0-

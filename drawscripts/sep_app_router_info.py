@@ -77,12 +77,8 @@ if __name__ == "__main__":
     app = sys.argv[1]
     hasSyn = sys.argv[2]
     subprocess.call(shlex.split("./getappfromwkld.sh "+app+" "+hasSyn))
-    # sep_app_router_from_wkld(app, '.', 'traffic')
+    sep_app_router_from_wkld(app, '.', 'traffic')
     sep_app_router_from_wkld(app, '.', 'stats')
-    # sep_app_router_from_wkld('MG', '.', 'traffic')
-    # sep_app_router_from_wkld('MG', '.', 'stats')
-    # sep_app_router_from_wkld('CR', '.', 'traffic')
-    # sep_app_router_from_wkld('CR', '.', 'stats')
     if(hasSyn==1):
-        # sep_app_router_from_wkld('syn', '.', 'traffic')
+        sep_app_router_from_wkld('syn', '.', 'traffic')
         sep_app_router_from_wkld('syn', '.', 'stats')

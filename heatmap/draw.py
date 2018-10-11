@@ -6,8 +6,9 @@ import os
 import subprocess
 import itertools
 import math
+from matplotlib import ticker
 
-NUM_BINS=400
+NUM_BINS=600
 RADIX=48
 LChannel=34
 GChannel=10
@@ -23,6 +24,7 @@ def readMPI(file_name):
     mpi_op["msg_sz"]=[]
 
     wlf = open("mpi-op-logs-"+file_name, "r")
+    print rank
     z = [ [ 0.0 for y in range( rank ) ] for x in range( rank ) ]
     count = 0
     count1 = 0
@@ -52,7 +54,7 @@ def readMPI(file_name):
         mpi_op["dst"].append(dst_rank)
         mpi_op["msg_sz"].append(msg_size)
         mpi_op["time"].append(time)
-        z[dst_rank][src_rank] += msg_size
+        z[dst_rank][src_rank] += msg_size * 1024.0    # KB
         count += 1
 
         chas_id1 = src_rank / 64
@@ -85,17 +87,25 @@ def drawHeatmap(rank, prefix, z):
     #plot heatmap
     fig = plt.figure(10)
     ax = fig.add_subplot(111)
-    ax.set_xlabel('MPI_ranks',fontsize = label_size)
-    ax.set_ylabel('MPI_ranks',fontsize = label_size)
+    ax.set_xlabel('MPI rank IDs',fontsize = label_size)
+    ax.set_ylabel('MPI rank IDs',fontsize = label_size)
+    # ax.set_xlim([0, 40])
+    # ax.set_ylim([0, 40])
     ax.set_xlim([0, rank])
     ax.set_ylim([0, rank])
     # plt.pcolormesh(x, y, z)
-    plt.pcolormesh(x, y, z, cmap=plt.cm.Greys)
-    plt.colorbar() #need a colorbar to show the intensity scale
+    plt.pcolormesh(x, y, z, cmap=plt.cm.afmhot_r)
+    cbar = plt.colorbar() #need a colorbar to show the intensity scale
+    cbar.set_label('Data amount (KB)', rotation=270)
+    tick_locator = ticker.MaxNLocator(nbins=7)
+    cbar.locator = tick_locator
+    cbar.update_ticks()
     title = prefix +'_Communication_Topology'
     # plt.title(title, fontsize = label_size)
     plt.yticks(fontsize = label_size)
     plt.xticks(fontsize = label_size)
+    plt.locator_params(axis='x', nbins=6)
+    plt.locator_params(axis='y', nbins=6)
     # plt.locator_params(axis='x', nbins=7)
     plt.tight_layout()
     plt.savefig('./'+title+'.png', format='png', dpi=1000)
@@ -110,31 +120,37 @@ def drawMsgmap(prefix, mpi_op, time_interval, end_time):
     msg_load = [0.0 for x in range(0,num_bins)]
     avg_load = [0.0 for x in range(0,num_bins)]
     max_load = [0.0 for x in range(0,num_bins)]
+    num_ranks = [0 for x in range(0,num_bins)]
+    srcs = []
+
     # print bins
     index = 0
     start = 0
     for i in xrange(0, num_bins):
         count = 0
+        del srcs[:]
         end = start + bin_sz*(i+1)
-
         while (index <len(mpi_op["time"]) and mpi_op["time"][index] <= end ):
             msg_load[i] += mpi_op["msg_sz"][index]*1024.0
             if (mpi_op["msg_sz"][index]*1024.0 > max_load[i]):
                 max_load[i] = mpi_op["msg_sz"][index]*1024.0
+            if mpi_op["src"][index] not in srcs:
+                srcs.append(mpi_op["src"][index])
             index += 1
             count += 1
-        # print i, count
-        if count > 0:  
-            avg_load[i] = (msg_load[i]/count)
+        # print i, len(srcs)
+        if len(srcs) > 0:  
+            avg_load[i] = (msg_load[i]/len(srcs))
         else:
             avg_load[i] = (msg_load[i])
+        num_ranks[i] = len(srcs)
 
     total_msg = sum(msg_load)
-    peak_load = np.max(avg_load)*1000.0*1000.0*1000.0/bin_sz/1024.0/1024.0    # GB/s
+    peak_load = np.max(msg_load)       # KB
     peakmax_load = np.max(avg_load)    # KB
     bot_load = np.min(avg_load)
     top_load = np.max(avg_load)
-    print 'Peak avg load: %.5f GB/s' % (peak_load)
+    print 'Peak msg load: %.5f KB' % (peak_load)
     print 'Total '+ format(total_msg, '.5f') +'KB ( '+ format(np.max(avg_load), '.5f')+' KB/'+ str(bin_sz) +'ns)'
     # print 'min avg: %d  max avg: %d' %(bot_load, top_load)
     print 'peak avg load: %.5f KB / %d ns' % (peakmax_load, bin_sz)
@@ -142,37 +158,59 @@ def drawMsgmap(prefix, mpi_op, time_interval, end_time):
     print temp[0:20]
 
     width = bin_sz/1000.0/1000.0
-    # fig = plt.figure(11)
-    # ax = fig.add_subplot(111)
-    # ax.set_xlabel('Time (milliseconds)', fontsize = label_size)
-    # ax.set_ylabel('Total message load (KB)', fontsize = label_size)
-    # ax.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
-    # plt.bar(bins, msg_load, width, color="blue", linewidth=0.5)
-    # plt.locator_params(axis='x', nbins=5)
-    # plt.xticks(fontsize=label_size)
-    # plt.yticks(fontsize=label_size)
-    # title = prefix +'_Message_Load'
-    # # plt.title(title, fontsize = label_size)
-    # plt.tight_layout()
-    # plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
+    fig = plt.figure(11)
+    ax = fig.add_subplot(111)
+    ax.set_xlabel('Time (milliseconds)', fontsize = label_size)
+    ax.set_ylabel('Total Message Load (KB)', fontsize = label_size)
+    ax.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
+    plt.plot(bins, msg_load, color="blue", linewidth=2)
+    plt.locator_params(axis='x', nbins=5)
+    plt.xticks(fontsize=label_size)
+    plt.yticks(fontsize=label_size)
+    title = prefix +'_Message_Load'
+    # plt.title(title, fontsize = label_size)
+    plt.tight_layout()
+    plt.savefig('./'+title+'.eps', format='eps', dpi=1000)
 
     fig = plt.figure(12)
     ax = fig.add_subplot(111)
     ax.set_xlabel('Time (milliseconds)', fontsize = label_size)
-    ax.set_ylabel('Msg load/rank (KB)', fontsize = label_size)
-    ax.set_xlim([0,66])
-    ax.set_ylim([0, 8])
-    # ax.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
+    ax.set_ylabel('Avg. msg load/rank (KB)', fontsize = label_size)
+    # ax.set_xlim([0,66])
+    if (prefix=='amg'):
+        print 'amg'
+        ax.set_ylim([0, 150])
+    elif (prefix=='fb'):
+        ax.set_ylim([0, 2600])
+    elif (prefix=='cr'):
+        print 'cr'
+        ax.set_ylim([0, 300])
+    ax.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
+    # ax.margins(x=0.5, y=0.5)
     plt.plot(bins, avg_load, color="slategrey", linewidth=2)
     ax.fill_between(bins, avg_load, color="slategrey")
     plt.xticks(fontsize=label_size)
     plt.yticks(fontsize=label_size)
     plt.locator_params(axis='x', nbins=5)
     title = 'Total '+ format(total_msg, '.5f') +'( '+ format(np.max(avg_load), '.5f')+' KB/'+ str(bin_sz) +'ns)'
-    plt.title(prefix, fontsize = label_size)
+    # plt.title(prefix, fontsize = label_size)
     plt.tight_layout()
     plt.savefig('./'+prefix +'_Avg_Msg_Load.eps', format='eps', dpi=1000)
     
+    fig = plt.figure(14)
+    ax = fig.add_subplot(111)
+    ax.set_xlabel('Time (milliseconds)', fontsize = label_size)
+    ax.set_ylabel('Num. of Ranks', fontsize = label_size)
+    ax.set_xlim([0, bin_sz*num_bins/1000.0/1000.0])
+    plt.plot(bins, num_ranks, color="blue", linewidth=3)
+    # ax.fill_between(bins, avg_load, color="slategrey")
+    plt.xticks(fontsize=label_size)
+    plt.yticks(fontsize=label_size)
+    plt.locator_params(axis='x', nbins=5)
+    # plt.title(prefix, fontsize = label_size)
+    plt.tight_layout()
+    plt.savefig('./'+prefix +'_Num_Ranks.eps', format='eps', dpi=1000)
+
     
     # fig = plt.figure(13)
     # ax = fig.add_subplot(111)
@@ -188,7 +226,7 @@ def drawMsgmap(prefix, mpi_op, time_interval, end_time):
     # # plt.title(title, fontsize = label_size)
     # plt.tight_layout()
     # plt.savefig('./'+prefix +'_Max_Msg_Load.eps', format='eps', dpi=1000)
-    
+    # plt.show()
     plt.close(fig)
 
 def drawCrossLoad(prefix, mpi_op, time_interval, end_time, PART, fig_num):
@@ -469,8 +507,8 @@ if __name__ == "__main__":
     if not time_interval:
         time_interval = int(math.ceil(end_time/NUM_BINS))
     # print time_interval
-    # drawHeatmap(rank, prefix, z)
-    drawMsgmap(prefix, mpi_op, time_interval, end_time)
+    drawHeatmap(rank, prefix, z)
+    # drawMsgmap(prefix, mpi_op, time_interval, end_time)
     # drawCrossLoad(prefix, mpi_op, time_interval, end_time, 'cabinet', 21)
     # drawCrossLoad(prefix, mpi_op, time_interval, end_time, 'chassis', 31)
     # drawCrossLoad(prefix, mpi_op, time_interval, end_time, 'router', 41)

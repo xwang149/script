@@ -25,14 +25,16 @@ if __name__ == "__main__":
         # pmd.tlink_traffic_plot(amg, 18)
 
         amg.load_router_stats_data()
-        pmd.router_lch_stats_plot(amg, 14)
-        pmd.router_gch_stats_plot(amg, 15)
+        # pmd.router_lch_stats_plot(amg, 14)
+        # pmd.router_gch_stats_plot(amg, 15)
+        pmd.router_lch_sat_plot(amg, 14)
+        pmd.router_gch_sat_plot(amg, 15)
 
-        # amg.load_router_traffic_data()
+        amg.load_router_traffic_data()
         # pmd.router_gch_traffic_plot(amg, 16)
         # pmd.router_lch_traffic_plot(amg, 17)
-        # pmd.router_lch_load_plot(amg,18)
-        # pmd.router_gch_load_plot(amg,19)
+        pmd.router_lch_load_plot(amg,18)
+        pmd.router_gch_load_plot(amg,19)
 
         pmd.plt.close()
 
@@ -49,14 +51,16 @@ if __name__ == "__main__":
         # pmd.tlink_traffic_plot(mg, 28)
 
         mg.load_router_stats_data()
-        pmd.router_lch_stats_plot(mg, 24)
-        pmd.router_gch_stats_plot(mg, 25)
+        # pmd.router_lch_stats_plot(mg, 24)
+        # pmd.router_gch_stats_plot(mg, 25)
+        pmd.router_lch_sat_plot(mg, 24)
+        pmd.router_gch_sat_plot(mg, 25)
 
-        # mg.load_router_traffic_data()
+        mg.load_router_traffic_data()
         # pmd.router_gch_traffic_plot(mg, 26)
         # pmd.router_lch_traffic_plot(mg, 27)
-        # pmd.router_lch_load_plot(mg,28)
-        # pmd.router_gch_load_plot(mg,29)
+        pmd.router_lch_load_plot(mg,28)
+        pmd.router_gch_load_plot(mg,29)
 
         pmd.plt.close()
 
@@ -73,14 +77,16 @@ if __name__ == "__main__":
         # pmd.tlink_traffic_plot(mg, 28)
 
         mg.load_router_stats_data()
-        pmd.router_lch_stats_plot(mg, 24)
-        pmd.router_gch_stats_plot(mg, 25)
+        # pmd.router_lch_stats_plot(mg, 24)
+        # pmd.router_gch_stats_plot(mg, 25)
+        pmd.router_lch_sat_plot(mg, 24)
+        pmd.router_gch_sat_plot(mg, 25)
 
-        # mg.load_router_traffic_data()
+        mg.load_router_traffic_data()
         # pmd.router_gch_traffic_plot(mg, 26)
         # pmd.router_lch_traffic_plot(mg, 27)
-        # pmd.router_lch_load_plot(mg,28)
-        # pmd.router_gch_load_plot(mg,29)
+        pmd.router_lch_load_plot(mg,28)
+        pmd.router_gch_load_plot(mg,29)
 
         pmd.plt.close()
 
@@ -97,14 +103,16 @@ if __name__ == "__main__":
         # pmd.tlink_traffic_plot(cr, 38)
 
         cr.load_router_stats_data()
-        pmd.router_lch_stats_plot(cr, 34)
-        pmd.router_gch_stats_plot(cr, 35)
+        # pmd.router_lch_stats_plot(cr, 34)
+        # pmd.router_gch_stats_plot(cr, 35)
+        pmd.router_lch_sat_plot(cr, 34)
+        pmd.router_gch_sat_plot(cr, 35)
 
-        # cr.load_router_traffic_data()
+        cr.load_router_traffic_data()
         # pmd.router_gch_traffic_plot(cr, 36)
         # pmd.router_lch_traffic_plot(cr, 37)
-        # pmd.router_lch_load_plot(cr,38)
-        # pmd.router_gch_load_plot(cr,39)
+        pmd.router_lch_load_plot(cr,38)
+        pmd.router_gch_load_plot(cr,39)
 
         pmd.plt.close()
 
@@ -121,14 +129,16 @@ if __name__ == "__main__":
         # pmd.tlink_traffic_plot(syn, 58)
 
         syn.load_router_stats_data()
-        pmd.router_lch_stats_plot(syn, 54)
-        pmd.router_gch_stats_plot(syn, 55)
+        # pmd.router_lch_stats_plot(syn, 54)
+        # pmd.router_gch_stats_plot(syn, 55)
+        pmd.router_lch_sat_plot(syn, 54)
+        pmd.router_gch_sat_plot(syn, 55)
 
-        # syn.load_router_traffic_data()
+        syn.load_router_traffic_data()
         # pmd.router_gch_traffic_plot(syn, 56)
         # pmd.router_lch_traffic_plot(syn, 57)
-        # pmd.router_lch_load_plot(syn,58)
-        # pmd.router_gch_load_plot(syn,59)
+        pmd.router_lch_load_plot(syn,58)
+        pmd.router_gch_load_plot(syn,59)
 
         pmd.plt.close()
 
@@ -145,14 +155,16 @@ if __name__ == "__main__":
         # pmd.tlink_traffic_plot(oth, 48)
 
         oth.load_router_stats_data()
-        pmd.router_lch_stats_plot(oth, 44)
-        pmd.router_gch_stats_plot(oth, 45)
+        # pmd.router_lch_stats_plot(oth, 44)
+        # pmd.router_gch_stats_plot(oth, 45)
+        pmd.router_lch_sat_plot(oth, 44)
+        pmd.router_gch_sat_plot(oth, 45)
 
-        # oth.load_router_traffic_data()
+        oth.load_router_traffic_data()
         # pmd.router_gch_traffic_plot(oth, 46)
         # pmd.router_lch_traffic_plot(oth, 47)
-        # pmd.router_lch_load_plot(oth,48)
-        # pmd.router_gch_load_plot(oth,49)
+        pmd.router_lch_load_plot(oth,48)
+        pmd.router_gch_load_plot(oth,49)
 
         pmd.plt.close()
     # pmd.plt.show()

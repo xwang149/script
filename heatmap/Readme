@@ -1,0 +1,7 @@
+./draw.py [rank] [prefix] [filename] ([time_interval])
+
+eg.
+./draw.py 1728 amg amg1728
+./draw.py 1000 mg mg1000
+./draw.py 1000 cr cr1000
+./draw.py 1000 fb fb1000
