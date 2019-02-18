@@ -12,8 +12,8 @@ if __name__ == "__main__":
     else:
         prefix = sys.argv[3]
     print prefix
-    if (app.lower()=='amg'):
-        amg = APP('AMG', prefix, ['pink', 'purple'], hasSyn)
+    if (app.lower()=='Alltoallv'):
+        amg = APP('Alltoallv', prefix, ['pink', 'purple'], hasSyn)
 
         amg.load_commtime_data('.')
         pmd.comm_time_plot(amg, 10)
@@ -38,8 +38,8 @@ if __name__ == "__main__":
 
         pmd.plt.close()
 
-    elif (app.lower()=='mg'):
-        mg = APP('MG',prefix, ['steelblue', 'black'], hasSyn)
+    elif (app.lower()=='Allreduce'):
+        mg = APP('Allreduce',prefix, ['steelblue', 'black'], hasSyn)
 
         mg.load_commtime_data('.')
         pmd.comm_time_plot(mg, 20)
@@ -64,8 +64,8 @@ if __name__ == "__main__":
 
         pmd.plt.close()
 
-    elif (app.lower()=='fb'):
-        mg = APP('FB',prefix, ['steelblue', 'black'], hasSyn)
+    elif (app.lower()=='Latencyall'):
+        mg = APP('Latencyall',prefix, ['steelblue', 'black'], hasSyn)
 
         mg.load_commtime_data('.')
         pmd.comm_time_plot(mg, 20)

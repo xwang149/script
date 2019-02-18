@@ -11,9 +11,9 @@ do
     if (( $syn==1 )); then
     	grep " 1$" mpi-replay-stats > syn.csv
     fi
-   # grep "APP 0" mpi-replay-stats > amg.csv
-   # grep "APP 1" mpi-replay-stats > cr.csv
-   # grep "APP 2" mpi-replay-stats > cr.csv
+   # grep "0.000000 0" mpi-replay-stats > alltoallv.csv
+   # grep "0.000000 1" mpi-replay-stats > allreduce.csv
+   # grep "0.000000 2" mpi-replay-stats > cr.csv
 
     cd ../
     

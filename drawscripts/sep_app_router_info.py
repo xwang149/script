@@ -11,6 +11,9 @@ import shlex
 
 groupsize = 96*4
 routersize = 4
+num_global_channels=1
+num_local_channels=34
+num_terminal_channels=4
 
 def identify_router_of_app(nwid_list, wkld_router_info):
     #get each the group id and router id that belongs to each application
@@ -48,16 +51,16 @@ def sep_app_router_from_wkld(app_name, path, output_info='stats'):
         #  print wkld_router_file
         # header = open(wkld_router_file, 'r').readline()
         channel_names=['lpid', 'groupid', 'routerid']
-        for i in range(0,34):
+        for i in range(0,num_local_channels):
             channel_names.append("lc"+str(i+1))
-        for i in range(0,4):
+        for i in range(0,num_global_channels):
             channel_names.append("gc"+str(i+1)) 
-        # for i in range(0,4):
-        #     channel_names.append("tc"+str(i+1))        
-        if(output_info=='stats'):
-            all_router_data = np.genfromtxt(wkld_router_file, delimiter=None, skip_header=1, names=channel_names)
-        else:
-            all_router_data = np.genfromtxt(wkld_router_file, delimiter=None, skip_header=0, names=channel_names)
+        for i in range(0,num_terminal_channels):
+            channel_names.append("tc"+str(i+1))        
+        # if(output_info=='stats'):
+        all_router_data = np.genfromtxt(wkld_router_file, delimiter=None, skip_header=1, names=channel_names)
+        # else:
+        #     all_router_data = np.genfromtxt(wkld_router_file, delimiter=None, skip_header=0, names=channel_names)
         app_mpi_replay_stats_file = os.path.join(lp_output_folder, app_name+'.csv')
         #  print app_mpi_replay_stats_file
         app_mpi_replay_stats = np.genfromtxt(app_mpi_replay_stats_file, delimiter=None, names=['lpid', 'tid', 'nsend', 'nrecv', 'bytesend', 'byterecv','sendtime', 'commtime', 'comptime', 'jobid'])

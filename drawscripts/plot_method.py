@@ -13,8 +13,8 @@ label_font = 25
 # line_style = [ ['green', '--'],  ['blue', '--'], ['green', '-'], ['blue','-'] ]       #place and route
 # line_style = [ ['green', '-'], ['red', '-'], ['purple', '-'], ['blue', '-'] ]            #adp
 # line_style = [ ['green', '--'], ['red', '--'], ['purple', '--'], ['blue','--'] ]      #min
-# line_style = [ ['green', '--'], ['gold', '--'], ['tomato', '--'], ['purple', '--'], ['blue','--'], 
-#                ['green', '-'], ['gold', '-'], ['tomato', '-'], ['purple', '-'], ['blue','-']]
+# line_style = [ ['green', '--'], ['gold', '--'], ['tomato', '--'], ['blue','--'], 
+#                ['green', '-'], ['gold', '-'], ['tomato', '-'], ['blue','-']]
 line_style = [ ['green', '--'], ['gold', '--'], ['blue','--'], 
                ['green', '-'], ['gold', '-'], ['blue','-']]
 seperation = 3  # color seperation for routing
@@ -49,7 +49,7 @@ def comm_time_plot(app, subplot):
     plt.xticks(fontsize = 20, rotation=70)
     # ax2.set_yticklabels(ax2.get_yticks())
     #axes = plt.gca()
-    ax2.set_ylim([0,5])
+    # ax2.set_ylim([90,110])
     # ax2.yaxis.set_ticks(np.arange(200, 500, 50))
     ax2.set_ylabel("Milliseconds", fontsize=label_font)
     title = app.name+'-CommunicationTime'
@@ -117,7 +117,7 @@ def msg_avghop_plot(APP, subplot):
 
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
-    axes.set_xlim(left=0)
+    # axes.set_xlim(left=0)
     axes.set_ylim([0,101])
 
     # Hide the right and top spines
@@ -279,7 +279,7 @@ def router_lch_traffic_plot(app, subplot):
     plt.yticks(fontsize=label_font)
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
-    axes.set_xlim(left=0)
+    # axes.set_xlim(left=0)
     # Hide the right and top spines
     axes.spines['right'].set_visible(False)
     axes.spines['top'].set_visible(False)
@@ -318,7 +318,7 @@ def router_gch_stats_plot(app, subplot):
     plt.locator_params(axis='x', nbins=5)
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
-    axes.set_xlim(left=0)
+    # axes.set_xlim(left=0)
     # Hide the right and top spines
     axes.spines['right'].set_visible(False)
     axes.spines['top'].set_visible(False)
@@ -366,7 +366,7 @@ def router_gch_traffic_plot(app, subplot):
     plt.locator_params(axis='x', nbins=5)
     #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))#scientific notation
     axes = plt.gca()
-    axes.set_xlim(left=0)
+    # axes.set_xlim(left=0)
     # Hide the right and top spines
     axes.spines['right'].set_visible(False)
     axes.spines['top'].set_visible(False)
@@ -412,7 +412,7 @@ def router_gch_load_plot(app, subplot):
     plt.yticks(fontsize=label_font)
     # plt.locator_params(axis='x', nbins=5)
     axes = plt.gca()
-    axes.set_xlim(left=0)
+    # axes.set_xlim(left=0)
     # axes.set_xlim([0,200])
     axes.set_ylim([0,101])
     # Hide the right and top spines
@@ -460,7 +460,7 @@ def router_lch_load_plot(app, subplot):
     plt.yticks(fontsize=label_font)
     # plt.locator_params(axis='x', nbins=5)
     axes = plt.gca()
-    axes.set_xlim(left=0)
+    # axes.set_xlim(left=0)
     # axes.set_xlim([0,300])
     # axes.xaxis.set_ticks(np.arange(0, 300, 50))
     axes.set_ylim([0,101])
@@ -504,7 +504,7 @@ def router_lch_sat_plot(app, subplot):
     plt.yticks(fontsize=label_font)
     # plt.locator_params(axis='x', nbins=5)
     axes = plt.gca()
-    axes.set_xlim(left=0)
+    # axes.set_xlim(left=0)
     axes.set_ylim([y_nozero*100,101])
     # Hide the right and top spines
     axes.spines['right'].set_visible(False)
@@ -545,8 +545,8 @@ def router_gch_sat_plot(app, subplot):
     plt.yticks(fontsize=label_font)
     # plt.locator_params(axis='x', nbins=5)
     axes = plt.gca()
-    axes.set_xlim(left=0)
-    axes.set_ylim([y_nozero*100,101])
+    # axes.set_xlim(left=0)
+    # axes.set_ylim([y_nozero*100,101])
     # Hide the right and top spines
     axes.spines['right'].set_visible(False)
     axes.spines['top'].set_visible(False)

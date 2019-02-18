@@ -508,7 +508,7 @@ if __name__ == "__main__":
         time_interval = int(math.ceil(end_time/NUM_BINS))
     # print time_interval
     drawHeatmap(rank, prefix, z)
-    # drawMsgmap(prefix, mpi_op, time_interval, end_time)
+    drawMsgmap(prefix, mpi_op, time_interval, end_time)
     # drawCrossLoad(prefix, mpi_op, time_interval, end_time, 'cabinet', 21)
     # drawCrossLoad(prefix, mpi_op, time_interval, end_time, 'chassis', 31)
     # drawCrossLoad(prefix, mpi_op, time_interval, end_time, 'router', 41)
