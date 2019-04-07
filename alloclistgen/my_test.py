@@ -10,21 +10,22 @@ for arg in sys.argv[1:-1]:
 hasSyn=int(sys.argv[-1])
 print jobrank_list
 # jobrank_list = [216, 840]
-Dragonfly(96, 22, 'rand_rotr', jobrank_list, 1,hasSyn)
+Dragonfly(96, 22, 'rand_rotr', jobrank_list, 3,hasSyn)
 # Dragonfly(96,22,'rand_chas',jobrank_list,1,hasSyn)
 # Dragonfly(96,22,'rand_cab',jobrank_list,1,hasSyn)
 #Dragonfly(8, 33, 'rand_part', jobrank_list, 1)
-#Dragonfly(96, 9, 'rand_grop', jobrank_list, 1,hasSyn)
-Dragonfly(96, 22, 'rand_node', jobrank_list, 1,hasSyn)
+# Dragonfly(96, 22, 'rand_grop', jobrank_list, 1,hasSyn)
+Dragonfly(96, 22, 'rand_node', jobrank_list, 3,hasSyn)
 #Dragonfly(96, 5, 'hyb', jobrank_list, 10,hasSyn)
 #Dragonfly(96, 9, 'cont-perm', jobrank_list, 1,hasSyn)
 Dragonfly(96, 22, 'cont', jobrank_list, 1,hasSyn)
 #Dragonfly(96, 9, 'cont-rand3d', jobrank_list, 1, hasSyn)
 #Dragonfly(96, 9, 'randCab-rand3d', jobrank_list, 1, hasSyn)
 
-Dragonfly1d(16, 65, 'rand_rotr', jobrank_list, 1,hasSyn)
-Dragonfly1d(16, 65, 'rand_node', jobrank_list, 1,hasSyn)
-Dragonfly1d(16, 65, 'cont', jobrank_list, 1,hasSyn)
+Dragonfly1d(32, 17, 16, 'rand_rotr', jobrank_list, 3,hasSyn)
+Dragonfly1d(32, 17, 16, 'rand_node', jobrank_list, 3,hasSyn)
+# Dragonfly1d(32, 17, 16, 'rand_grop', jobrank_list, 1,hasSyn)
+Dragonfly1d(32, 17, 16, 'cont', jobrank_list, 1,hasSyn)
 
 
 #  single_job = [[100]]

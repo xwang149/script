@@ -2,13 +2,13 @@ import random
 from enum import Enum
 
 class Dragonfly1d(object):
-    def __init__(self, router, group, alloc_type, job_rank, num_seed,syn):
+    def __init__(self, router, group, cn, alloc_type, job_rank, num_seed,syn):
         self.num_router_per_group = router
         self.num_row = 1
-        self.num_col = 16
+        self.num_col = router
         self.num_group = group
         #self.num_node_per_router = self.num_router_per_group/2
-        self.num_node_per_router = 8
+        self.num_node_per_router = cn
         self.total_node = self.num_router_per_group*self.num_node_per_router*self.num_group
         self.total_router = self.num_router_per_group*self.num_group
         self.job_rank = job_rank
@@ -19,7 +19,7 @@ class Dragonfly1d(object):
         self.load_alloc()
 
     def alloc_file_prefix(self):
-        self.alloc_file = self.alloc_type+'-alloc-'+str(self.total_node)+'-'
+        self.alloc_file = self.alloc_type+'-1d-'+str(self.total_node)+'-'
         for jobsize in self.job_rank:
             self.alloc_file += str(jobsize)+'_'
         self.alloc_file = self.alloc_file[:-1]
@@ -80,7 +80,7 @@ class Dragonfly1d(object):
 
         for seed in range(self.num_seed):
             tmp_filename = self.alloc_file
-            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
             #print self.alloc_file
             f = open(self.alloc_file+'.conf', 'w')
             random.seed(seed)
@@ -122,7 +122,7 @@ class Dragonfly1d(object):
 #
 #        for seed in range(self.num_seed):
 #            tmp_filename = self.alloc_file
-#            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+#            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
 #            #print self.alloc_file
 #            f = open(self.alloc_file+'.conf', 'w')
 #            random.seed(seed)
@@ -194,7 +194,7 @@ class Dragonfly1d(object):
 
         for seed in range(self.num_seed):
             tmp_filename = self.alloc_file
-            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
             #print self.alloc_file
             f = open(self.alloc_file+'.conf', 'w')
             random.seed(seed)
@@ -239,7 +239,7 @@ class Dragonfly1d(object):
 
         for seed in range(self.num_seed):
             tmp_filename = self.alloc_file
-            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
             #print self.alloc_file
             f = open(self.alloc_file+'.conf', 'w')
             random.seed(seed)
@@ -280,7 +280,7 @@ class Dragonfly1d(object):
 
         for seed in range(self.num_seed):
             tmp_filename = self.alloc_file
-            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
             #print self.alloc_file
             f = open(self.alloc_file+'.conf', 'w')
             random.seed(seed)
@@ -315,7 +315,7 @@ class Dragonfly1d(object):
         #  chunk_size is the num of consecutive nodes 
         for seed in range(self.num_seed):
             tmp_filename = self.alloc_file
-            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
             #print self.alloc_file
             f = open(self.alloc_file+'.conf', 'w')
             node_list = range(0, int(self.total_node))
@@ -341,14 +341,14 @@ class Dragonfly1d(object):
         #randomize that nodes set sequence resulting random mapping with random allocation
         for seed in range(self.num_seed):#num. of random node set for each job
             tmp_filename = self.alloc_file
-            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
             node_list = range(0, int(self.total_node))
             random.seed(seed)
             for rank in self.job_rank:
                 alloc_list = random.sample(node_list, rank)
                 node_list = [elem for elem in node_list if (elem not in alloc_list)]
                 for perm_seed in range(10):#num. of permutation for each node set
-                    self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+str(perm_seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+                    self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+str(perm_seed)+self.alloc_file[self.alloc_file.find("-1d"):]
                     f = open(self.alloc_file+'.conf', 'a')
                     self.alloc_file=tmp_filename
                     random.seed(perm_seed)
@@ -363,7 +363,7 @@ class Dragonfly1d(object):
     def cont_permutation(self):
         for seed in range(self.num_seed):
             file_surfix = self.alloc_file
-            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
             f = open(self.alloc_file+'.conf', 'w')
             if(self.syn==0):
                 start = 0
@@ -400,7 +400,7 @@ class Dragonfly1d(object):
     def cont_rand3d(self):
         for seed in range(self.num_seed):
             file_surfix = self.alloc_file
-            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
             f = open(self.alloc_file+'.conf', 'w')
             if(self.syn==0):
                 start = 0
@@ -461,7 +461,7 @@ class Dragonfly1d(object):
         
         for seed in range(self.num_seed):
             tmp_filename = self.alloc_file
-            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
             #print self.alloc_file
             f = open(self.alloc_file+'.conf', 'w')
             random.seed(seed)
@@ -517,7 +517,7 @@ class Dragonfly1d(object):
         cont_job_num = 1
         for seed in range(self.num_seed):
             tmp_filename = self.alloc_file
-            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
             f = open(self.alloc_file+'.conf', 'w')
             node_list = range(0, int(self.total_node))
             random.seed(seed)
@@ -541,7 +541,7 @@ class Dragonfly1d(object):
         # the size of the area is TWICE as mush as the job size
         for seed in range(self.num_seed):
             tmp_filename = self.alloc_file
-            self.alloc_file = self.alloc_file[:self.alloc_file.find("-alloc")]+str(seed)+self.alloc_file[self.alloc_file.find("-alloc"):]
+            self.alloc_file = self.alloc_file[:self.alloc_file.find("-1d")]+str(seed)+self.alloc_file[self.alloc_file.find("-1d"):]
             f = open(self.alloc_file+'.conf', 'w')
             node_list = range(0, int(self.total_node))
             random.seed(seed)
